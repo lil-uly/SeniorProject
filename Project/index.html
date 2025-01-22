@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Web App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <img src="assets/logo.png" alt="Logo">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#settings">Settings</a></li>
+        <li><a href="#support">Support</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Business Owner Dashboard -->
+    <section id="dashboard" class="tab-content active">
+      <h1>Performance Dashboard</h1>
+      <div class="dashboard-cards">
+        <div class="card">
+          <h2>Sales</h2>
+          <canvas id="salesChart"></canvas>
+        </div>
+        <div class="card">
+          <h2>Customer Engagement</h2>
+          <canvas id="engagementChart"></canvas>
+        </div>
+        <div class="card">
+          <h2>Inventory</h2>
+          <canvas id="inventoryChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settings" class="tab-content">
+      <h1>Settings</h1>
+      <p>Manage backups, notifications, and access control.</p>
+    </section>
+
+    <!-- Customer Dashboard -->
+    <section id="customer-dashboard" class="tab-content">
+      <h1>Customer Dashboard</h1>
+      <div>
+        <h2>Order History</h2>
+        <ul id="order-history"></ul>
+      </div>
+      <div>
+        <h2>Recommendations</h2>
+        <div id="recommendations" class="grid"></div>
+      </div>
+    </section>
+  </main>
+
+<!-- Footer -->
+<footer>
+    <p>&copy; 2025 Business Web App</p>
+  </footer>
+  
+  <!-- External Chart.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Your custom JavaScript -->
+  <script src="script.js"></script>
