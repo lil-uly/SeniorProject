@@ -62,13 +62,37 @@
     </section>
   </main>
 
-<!-- Footer -->
-<footer>
-    <p>&copy; 2025 Business Web App</p>
-  </footer>
+
   
   <!-- External Chart.js library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <!-- Your custom JavaScript -->
   <script src="script.js"></script>
+  <div>
+    <h2>Dashboard</h2>
+    <p>Sales: <span id="sales">$0</span></p>
+    <p>Customer Engagement: <span id="customer-engagement">0%</span></p>
+    <h3>Inventory Levels:</h3>
+    <ul id="inventory"></ul>
+  </div>
+  
+  <div>
+    <h2>Submit an Order</h2>
+    <label for="customer-name">Customer Name:</label>
+    <input id="customer-name" type="text" />
+    <label for="product">Product:</label>
+    <input id="product" type="text" />
+    <label for="quantity">Quantity:</label>
+    <input id="quantity" type="number" />
+    <button onclick="submitOrder()">Submit Order</button>
+  </div>
+  
+  <script>
+    fetchDashboardData(); // Fetch dashboard data when the page loads
+  </script>
+  
+  <!-- Footer -->
+<footer>
+  <p>&copy; 2025 Business Web App</p>
+</footer>

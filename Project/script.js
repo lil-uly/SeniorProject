@@ -67,3 +67,42 @@ function renderRecommendations() {
     recContainer.appendChild(recItem);
   });
 }
+// Fetch dashboard data from the backend
+function fetchDashboardData() {
+  fetch("http://127.0.0.1:5000/api/dashboard")
+    .then(response => response.json())
+    .then(data => {
+      console.log("Dashboard Data:", data);
+      // Update the dashboard on the front-end
+      document.getElementById("sales").textContent = `$${data.sales}`;
+      document.getElementById("customer-engagement").textContent = `${data.customer_engagement}%`;
+      const inventory = document.getElementById("inventory");
+      inventory.innerHTML = ""; // Clear inventory list
+      for (const [product, qty] of Object.entries(data.inventory_levels)) {
+        const item = document.createElement("li");
+        item.textContent = `${product}: ${qty} items`;
+        inventory.appendChild(item);
+      }
+    })
+    .catch(error => console.error("Error fetching dashboard data:", error));
+}
+// Submit an order to the backend
+function submitOrder() {
+  const order = {
+    customerName: document.getElementById("customer-name").value,
+    product: document.getElementById("product").value,
+    quantity: parseInt(document.getElementById("quantity").value)
+  };
+
+  fetch("http://127.0.0.1:5000/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(order)
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.message);
+      alert("Order submitted successfully!");
+    })
+    .catch(error => console.error("Error submitting order:", error));
+}
