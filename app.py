@@ -5,7 +5,8 @@ import config
 import os
 import sys
 import hmac, hashlib, base64 
-
+import cognito_idp
+from cognito_idp import CognitoIdentityProviderWrapper
 
 app = Flask(__name__, static_folder="static")
 
@@ -22,7 +23,7 @@ oauth.register(
   client_kwargs={'scope': 'phone openid email'}
 )
 client = boto3.client('cognito-idp', region_name=config.AWS_REGION)
-
+cognito = CognitoIdentityProviderWrapper(client, config.BUSINESS_COGNITO_USER_POOL_ID, config.COGNITO_APP_CLIENT_ID, config.CLIENT_SECRET)
 
 @app.route('/')
 def index():
@@ -33,12 +34,30 @@ def signup():
     data = request.json
     username = data['username']
 
+    secret_hash = cognito.secret_hash(username)
+
     try:
         response = client.sign_up(
             ClientId='5qcjboo8d05tdnck98j06btl3d',
-            SecretHash='1fuk56sr247r6vmr026l55irbj4v8c12v2kcfaptjdsqd4a393k8',
+            SecretHash=secret_hash,
             Username=data['username'],
-            Password=data['password']
+            Password=data['password'], 
+            UserAttributes=[{
+                'Name': 'name',
+                'Value': data['name'],
+             }, 
+             {
+                'Name': 'email',
+                'Value': data['email'],
+             },
+             {
+                'Name': 'address',
+                'Value': data['address'],
+             },
+             {
+                'Name': 'birthdate',
+                'Value': data['birthday'],
+             }]
         )
         return jsonify({"message": "User is being sent confirmation!", "response": response})
     except Exception as e:
@@ -47,10 +66,12 @@ def signup():
 @app.route('/confirm-sign-up', methods=['POST'])
 def confirm_signup():
     data = request.json
+    username = data['username']
+    secret_hash = cognito.secret_hash(username)
     try:
         response = client.confirm_sign_up(
             ClientId='5qcjboo8d05tdnck98j06btl3d',
-            SecretHash='1fuk56sr247r6vmr026l55irbj4v8c12v2kcfaptjdsqd4a393k8',
+            SecretHash=secret_hash,
             Username=data['username'],
             ConfirmationCode=data['code'],
             ForceAliasCreation=False # ensures that people can't sign up with same # or email 

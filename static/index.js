@@ -2,11 +2,14 @@ async function signup() {
   const username = document.getElementById('signup-username').value;
   const email = document.getElementById('signup-email').value;
   const password = document.getElementById('signup-password').value;
+  const name = document.getElementById('signup-name').value;
+  const birthday = document.getElementById('signup-birthday').value;
+  const address = document.getElementById('signup-address').value;
 
   const response = await fetch('/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password})
+      body: JSON.stringify({ username, email, password, name, birthday, address})
   });
 
   const data = await response.json();
