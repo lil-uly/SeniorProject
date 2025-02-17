@@ -80,12 +80,20 @@ def confirm_signup():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@app.route('/login')
+@app.route('/login', methods=['POST'])
 def login():
-    # Alternate option to redirect to /authorize
-    # redirect_uri = url_for('authorize', _external=True)
-    # return oauth.oidc.authorize_redirect(redirect_uri)
-    return oauth.oidc.authorize_redirect('https://d84l1y8p4kdic.cloudfront.net')
+    data = request.json
+    username = data['username']
+    password = data['password']
+    secret_hash = cognito.secret_hash(username)
+    try:
+        response = client.initiate_auth(
+            AuthFlow='USER_PASSWORD_AUTH',
+            ClientId=app_client_id,
+            AuthParameters={'USERNAME': username, 'PASSWORD': password, 'SECRET_HASH': secret_hash})
+        return jsonify({"message": "User logged in successfully!", "response": response})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/authorize')
 def authorize():

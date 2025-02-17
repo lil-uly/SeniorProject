@@ -45,12 +45,7 @@ async function login() {
   });
 
   const data = await response.json();
-  if (data.token) {
-      localStorage.setItem('token', data.token);
-      alert("Login Successful!");
-  } else {
-      alert(data.error);
-  }
+  alert(data.message || data.error);
 }
 
 // instructing user to enter confirmation code
