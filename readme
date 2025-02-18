@@ -1,0 +1,4 @@
+For testing this interface 
+
+1). in terminal type -> python -m http.server
+2). in your browser go to http://localhost:8000/Project/
