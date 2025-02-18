@@ -59,3 +59,47 @@ CREATE INDEX idx_orders_customer ON orders(customer_id);
 CREATE INDEX idx_order_items_order ON order_items(order_id);
 CREATE INDEX idx_engagement_customer ON customer_engagement(customer_id);
 CREATE INDEX idx_engagement_timestamp ON customer_engagement(timestamp);
+
+-- test data
+-- Insert test data into customers table
+INSERT INTO customers (name, email) VALUES 
+('John Doe', 'john.doe@example.com'),
+('Jane Smith', 'jane.smith@example.com'),
+('Alice Johnson', 'alice.johnson@example.com'),
+('Bob Brown', 'bob.brown@example.com');
+
+-- Insert test data into products table
+INSERT INTO products (name, description, price) VALUES 
+('Product A', 'Description for product A', 10.99),
+('Product B', 'Description for product B', 20.99),
+('Product C', 'Description for product C', 30.99),
+('Product D', 'Description for product D', 40.99);
+
+-- Insert test data into inventory table
+INSERT INTO inventory (product_id, quantity, reorder_point) VALUES 
+(1, 100, 10),
+(2, 200, 20),
+(3, 300, 30),
+(4, 400, 40);
+
+-- Insert test data into orders table
+INSERT INTO orders (customer_id, order_date) VALUES 
+(1, '2023-01-01 10:00:00'),
+(2, '2023-01-02 11:00:00'),
+(3, '2023-01-03 12:00:00'),
+(4, '2023-01-04 13:00:00');
+
+-- Insert test data into order_items table
+INSERT INTO order_items (order_id, product_id, quantity, price_at_time) VALUES 
+(1, 1, 2, 10.99),
+(1, 2, 1, 20.99),
+(2, 3, 3, 30.99),
+(3, 4, 4, 40.99),
+(4, 1, 1, 10.99);
+
+-- Insert test data into customer_engagement table
+INSERT INTO customer_engagement (customer_id, engagement_type, engagement_value) VALUES 
+(1, 'website_visit', 5),
+(2, 'purchase', 10),
+(3, 'support_contact', 3),
+(4, 'website_visit', 7);
