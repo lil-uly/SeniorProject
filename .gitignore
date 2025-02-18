@@ -1,6 +1,0 @@
-.venv/
-tutorial-env/
-__pycache__/
-
-path/to/secret_file
-venv/lib/python3.9/site-packages/awscli/examples/greengrass/create-connector-definition-version.rst
