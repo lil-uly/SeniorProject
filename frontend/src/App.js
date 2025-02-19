@@ -39,15 +39,20 @@ const App = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/login", form, { 
-        // Include `withCredentials: true` if needed for cookies or sessions
-      });
-      
-      // If the response status is a redirect, you should handle it
-      if (response.status === 200 && response.data.redirect) {
-        window.location.href = response.data.redirect;  // Redirect the user to the URL from the response
+      const response = await axios.post("http://127.0.0.1:5000/login", form);
+      console.log("Full Response:", response); // Log the full response
+  
+      if (response.data && response.data.message) {
+        alert(response.data.message);
+        console.log("Login Success:", response.data.response);
+  
+        if (response.data.response.AuthenticationResult) {
+          localStorage.setItem("accessToken", response.data.response.AuthenticationResult.AccessToken);
+          localStorage.setItem("idToken", response.data.response.AuthenticationResult.IdToken);
+          localStorage.setItem("refreshToken", response.data.response.AuthenticationResult.RefreshToken);
+        }
       } else {
-        alert("Unexpected response structure");
+        alert("Unexpected response structure: " + JSON.stringify(response.data));
       }
     } catch (error) {
       console.error("Error during login:", error);
@@ -71,16 +76,8 @@ const App = () => {
       <button onClick={handleConfirmSignup}>Confirm</button>
 
       <h1>Login</h1>
-      <input 
-        type="text" 
-        name="username" 
-        placeholder="Username" 
-      />
-      <input 
-        type="password" 
-        name="password" 
-        placeholder="Password" 
-      />
+      <input type="text" name="username" placeholder="Username" onChange={handleChange} />
+      <input type="password" name="password" placeholder="Password" onChange={handleChange} />
       <button onClick={handleLogin}>Login</button>
     </div>
   );
