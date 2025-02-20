@@ -1,11 +1,15 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
 import "./App.css";
+import Dashboard from "./pages/Dashboard";
 
-const App = () => {
+const Auth = () => {
   const [form, setForm] = useState({ username: "", password: "", email: "", name: "", address: "", birthday: "" });
   const [confirmationCode, setConfirmationCode] = useState("");
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate(); // Now inside a Router-wrapped component
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -36,19 +40,25 @@ const App = () => {
   const handleLogin = async () => {
     try {
       const response = await axios.post("http://127.0.0.1:5000/login", form);
-      if (response.data.response.AuthenticationResult) {
+      console.log("API Response:", response.data);
+  
+      if (response.data.response && response.data.response.AuthenticationResult) {
         localStorage.setItem("accessToken", response.data.response.AuthenticationResult.AccessToken);
         localStorage.setItem("idToken", response.data.response.AuthenticationResult.IdToken);
         localStorage.setItem("refreshToken", response.data.response.AuthenticationResult.RefreshToken);
-        window.location.href = "localhost:8000/Project";
+        setIsAuthenticated(true);
+        navigate("/dashboard");
+      } else {
+        alert("Invalid login response format");
       }
     } catch (error) {
-      alert(error.response ? error.response.data.error : "An error occurred");
+      console.error("Login Error:", error);
+      alert(error.response ? error.response.data.error : `Error: ${error.message}`);
     }
-  };
+  };  
 
   return (
-    <div className="login-container">      
+    <div className="login-container">
       <h2>Login</h2>
       <input className="input-field" type="text" name="username" placeholder="Username" onChange={handleChange} />
       <input className="input-field" type="password" name="password" placeholder="Password" onChange={handleChange} />
@@ -67,6 +77,17 @@ const App = () => {
       <input className="input-field" type="text" placeholder="Confirmation Code" onChange={(e) => setConfirmationCode(e.target.value)} />
       <button className="login-button" onClick={handleConfirmSignup}>Confirm</button>
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Auth />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 };
 
