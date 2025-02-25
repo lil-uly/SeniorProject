@@ -6,7 +6,6 @@ import requests
 from flask_cors import CORS
 from authlib.integrations.flask_client import OAuth
 
-
 app = Flask(__name__)
 
 # Sample data for dashboard
