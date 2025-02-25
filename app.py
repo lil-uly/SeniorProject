@@ -13,17 +13,17 @@ app = Flask(__name__, static_folder="static")
 
 CORS(app)
 
-app_client_id = '5qcjboo8d05tdnck98j06btl3d'
+app_client_id = '3uo9it101gch2ik7jlt8ou5ijb'
 
 # app.secret_key = os.urandom(24)  # Use a secure random key in production
 oauth = OAuth(app)
 oauth.register(
   name='oidc',
-  authority='https://cognito-idp.us-east-2.amazonaws.com/us-east-2_lDuTUADAG',
-  client_id='5qcjboo8d05tdnck98j06btl3d',
-  client_secret= '1fuk56sr247r6vmr026l55irbj4v8c12v2kcfaptjdsqd4a393k8',
-  server_metadata_url='https://cognito-idp.us-east-2.amazonaws.com/us-east-2_lDuTUADAG/.well-known/openid-configuration',
-  client_kwargs={'scope': 'phone openid email'}
+  authority='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LhWvaZUmp',
+  client_id='3uo9it101gch2ik7jlt8ou5ijb',
+  client_secret='9kpgl8dm8g1tkv5rmdu5fo8m15fr5ghoi6ldtvo5url8nm3dgm2',
+  server_metadata_url='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_LhWvaZUmp/.well-known/openid-configuration',
+  client_kwargs={'scope': 'email openid phone'}
 )
 client = boto3.client('cognito-idp', region_name=config.AWS_REGION)
 cognito = CognitoIdentityProviderWrapper(client, config.BUSINESS_COGNITO_USER_POOL_ID, config.COGNITO_APP_CLIENT_ID, config.CLIENT_SECRET)
@@ -41,7 +41,7 @@ def signup():
 
     try:
         response = client.sign_up(
-            ClientId='5qcjboo8d05tdnck98j06btl3d',
+            ClientId=app_client_id,
             SecretHash=secret_hash,
             Username=data['username'],
             Password=data['password'], 
@@ -60,6 +60,10 @@ def signup():
              {
                 'Name': 'birthdate',
                 'Value': data['birthday'],
+             },
+             {
+                'Name': 'phone_number',
+                'Value': data['phonenumber']
              }]
         )
         return jsonify({"message": "User is being sent confirmation!", "response": response})
@@ -73,7 +77,7 @@ def confirm_signup():
     secret_hash = cognito.secret_hash(username)
     try:
         response = client.confirm_sign_up(
-            ClientId='5qcjboo8d05tdnck98j06btl3d',
+            ClientId=app_client_id,
             SecretHash=secret_hash,
             Username=data['username'],
             ConfirmationCode=data['code'],
