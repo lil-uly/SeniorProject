@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "r
 import axios from "axios";
 import "./App.css";
 import Dashboard from "./pages/Dashboard";
+import BusinessRegistration from "./pages/BusinessRegistration";
 
 const Auth = () => {
   const [form, setForm] = useState({ username: "", password: "", email: "", name: "", address: "", birthday: "" });
@@ -86,6 +87,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/business-registration" element={<BusinessRegistration />} />
       </Routes>
     </Router>
   );
