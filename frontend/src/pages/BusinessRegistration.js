@@ -29,7 +29,6 @@ const BusinessRegistration = () => {
 
     return (
         <div>
-            <h1>Business Registration</h1>
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>Business Name:</label>

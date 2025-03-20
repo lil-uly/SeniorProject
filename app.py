@@ -35,36 +35,23 @@ def index():
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
-    username = data['username']
-
-    secret_hash = cognito.secret_hash(username)
+    email = data['email']
+    secret_hash = cognito.secret_hash(email)
 
     try:
         response = client.sign_up(
             ClientId=app_client_id,
             SecretHash=secret_hash,
-            Username=data['username'],
+            Username=email,
             Password=data['password'], 
-            UserAttributes=[{
-                'Name': 'name',
-                'Value': data['name'],
-             }, 
-             {
-                'Name': 'email',
-                'Value': data['email'],
-             },
-             {
-                'Name': 'address',
-                'Value': data['address'],
-             },
-             {
-                'Name': 'birthdate',
-                'Value': data['birthday'],
-             },
-             {
-                'Name': 'phone_number',
-                'Value': data['phonenumber']
-             }]
+            UserAttributes=[
+                {'Name': 'email', 'Value': data['email']},
+                {'Name': 'name', 'Value': f"{data['firstName']} {data['lastName']}"},
+                {'Name': 'address', 'Value': data['physicalAddress']},
+                {'Name': 'custom:business_name', 'Value': data['businessName']},
+                {'Name': 'custom:business_type', 'Value': data['businessType']},
+                {'Name': 'custom:website', 'Value': data['websiteAddress']}
+            ]
         )
         return jsonify({"message": "User is being sent confirmation!", "response": response})
     except Exception as e:
