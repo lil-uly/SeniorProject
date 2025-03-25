@@ -3,24 +3,60 @@ import os
 import boto3
 import json
 import requests
+import psycopg2
 from flask_cors import CORS
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
+CORS(app)
 
-# Sample data for dashboard
-business_metrics = {
-    "sales": 12000,
-    "customer_engagement": 85,  # Percentage
-    "inventory_levels": {
-        "Product A": 30,
-        "Product B": 20,
-        "Product C": 50
-    }
-}
+# Database connection function
+def create_connection():
+    try:
+        conn = psycopg2.connect(
+            dbname="Cloud Catalyst",
+            user="cloudadmin",
+            password="SeniorProject2!",
+            host="localhost",
+            port="5432"
+        )
+        return conn
+    except Exception as e:
+        print(f"An error occurred while connecting to the database: {e}")
+        return None
 
-# Sample order data
-orders = []
+# Fetch business metrics from the database
+def fetch_business_metrics():
+    conn = create_connection()
+    if conn:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT 
+                (SELECT COUNT(*) FROM orders) AS total_sales,
+                (SELECT AVG(engagement_value) FROM customer_engagement) AS avg_engagement,
+                (SELECT json_agg(json_build_object('product', name, 'quantity', quantity)) FROM inventory) AS inventory_levels
+        ''')
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return {
+            "sales": result[0],
+            "customer_engagement": result[1],
+            "inventory_levels": result[2]
+        }
+    return None
+
+# Fetch orders from the database
+def fetch_orders():
+    conn = create_connection()
+    if conn:
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM orders')
+        orders = cur.fetchall()
+        cur.close()
+        conn.close()
+        return orders
+    return []
 
 @app.route('/')
 def home():
@@ -29,18 +65,34 @@ def home():
 # API to get business metrics for the dashboard
 @app.route('/api/dashboard', methods=['GET'])
 def get_dashboard_data():
-    return jsonify(business_metrics)
+    metrics = fetch_business_metrics()
+    if metrics:
+        return jsonify(metrics)
+    else:
+        return jsonify({"error": "Unable to fetch business metrics"}), 500
 
 # API to submit a customer order
 @app.route('/api/orders', methods=['POST'])
 def submit_order():
     data = request.json
-    orders.append(data)
-    return jsonify({"message": "Order submitted successfully!", "orders": orders})
+    conn = create_connection()
+    if conn:
+        cur = conn.cursor()
+        cur.execute('''
+            INSERT INTO orders (customer_id, order_date)
+            VALUES (%s, %s)
+        ''', (data['customer_id'], data['order_date']))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"message": "Order submitted successfully!"})
+    else:
+        return jsonify({"error": "Unable to submit order"}), 500
 
 # API to get all submitted orders
 @app.route('/api/orders', methods=['GET'])
 def get_orders():
+    orders = fetch_orders()
     return jsonify({"orders": orders})
 
 # API to interact with Amazon Nova Pro model
@@ -75,7 +127,6 @@ def nova_pro():
             ]
         }
     }
-    
 
     response = requests.post(url, headers=headers, json=body)
     if response.status_code == 200:

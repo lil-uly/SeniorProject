@@ -13,7 +13,7 @@ def lambda_handler(event, context):
     
     # Store in PostgreSQL database
     try:
-        # Connect to your PostgreSQL database
+        # Connect to PostgreSQL database
         conn = psycopg2.connect(
             dbname="Cloud Catalyst",
             user="cloudadmin",
