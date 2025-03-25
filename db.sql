@@ -53,6 +53,17 @@ CREATE TABLE customer_engagement (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE businesses (
+    business_id SERIAL PRIMARY KEY,
+    business_name VARCHAR(255),
+    business_type VARCHAR(255),
+    address TEXT,
+    business_email VARCHAR(255),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    number_of_employees INTEGER,
+    annual_revenue NUMERIC
+);
 -- Create indexes for better query performance
 CREATE INDEX idx_inventory_product ON inventory(product_id);
 CREATE INDEX idx_orders_customer ON orders(customer_id);
