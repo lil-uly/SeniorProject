@@ -11,7 +11,7 @@ from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static")
 
-CORS(app)
+CORS(app, origins=["http://localhost:3000"])
 
 app_client_id = '3uo9it101gch2ik7jlt8ou5ijb'
 
@@ -35,23 +35,36 @@ def index():
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.json
-    email = data['email']
-    secret_hash = cognito.secret_hash(email)
+    username = data['username']
+
+    secret_hash = cognito.secret_hash(username)
 
     try:
         response = client.sign_up(
             ClientId=app_client_id,
             SecretHash=secret_hash,
-            Username=email,
+            Username=data['username'],
             Password=data['password'], 
-            UserAttributes=[
-                {'Name': 'email', 'Value': data['email']},
-                {'Name': 'name', 'Value': f"{data['firstName']} {data['lastName']}"},
-                {'Name': 'address', 'Value': data['physicalAddress']},
-                {'Name': 'custom:business_name', 'Value': data['businessName']},
-                {'Name': 'custom:business_type', 'Value': data['businessType']},
-                {'Name': 'custom:website', 'Value': data['websiteAddress']}
-            ]
+            UserAttributes=[{
+                'Name': 'name',
+                'Value': data['name'],
+             }, 
+             {
+                'Name': 'email',
+                'Value': data['email'],
+             },
+             {
+                'Name': 'address',
+                'Value': data['address'],
+             },
+             {
+                'Name': 'birthdate',
+                'Value': data['birthday'],
+             },
+             {
+                'Name': 'phone_number',
+                'Value': data['phonenumber']
+             }]
         )
         return jsonify({"message": "User is being sent confirmation!", "response": response})
     except Exception as e:
@@ -80,13 +93,22 @@ def login():
     username = data['username']
     password = data['password']
     secret_hash = cognito.secret_hash(username)
+
     try:
         response = client.initiate_auth(
             AuthFlow='USER_PASSWORD_AUTH',
             ClientId=app_client_id,
-            AuthParameters={'USERNAME': username, 'PASSWORD': password, 'SECRET_HASH': secret_hash})
+            AuthParameters={'USERNAME': username, 'PASSWORD': password, 'SECRET_HASH': secret_hash}
+        )
         return jsonify({"message": "User logged in successfully!", "response": response})
+
+    # Handle specific Cognito exceptions
+    except client.exceptions.NotAuthorizedException as e:
+        return jsonify({"error": "Incorrect username or password"}), 400
+    except client.exceptions.UserNotFoundException as e:
+        return jsonify({"error": "User not found"}), 400
     except Exception as e:
+        # Catch all other errors and return a generic error message
         return jsonify({"error": str(e)}), 400
 
 @app.route('/authorize')
