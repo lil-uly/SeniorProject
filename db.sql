@@ -1,3 +1,24 @@
+-- Create the database if it doesn't exist
+DO $$ BEGIN
+   IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'cloud_catalyst') THEN
+      CREATE DATABASE cloud_catalyst;
+   END IF;
+END $$;
+
+-- Connect to the database
+\c cloud_catalyst;
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS order_items CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS inventory CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS customers CASCADE;
+DROP TABLE IF EXISTS customer_engagement CASCADE;
+DROP TABLE IF EXISTS businesses CASCADE;
+
+
+-- Create the tables
+
 -- Customer table
 CREATE TABLE customers (
     customer_id SERIAL PRIMARY KEY,
@@ -53,6 +74,7 @@ CREATE TABLE customer_engagement (
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Businesses table
 CREATE TABLE businesses (
     business_id SERIAL PRIMARY KEY,
     business_name VARCHAR(255),
@@ -64,6 +86,7 @@ CREATE TABLE businesses (
     number_of_employees INTEGER,
     annual_revenue NUMERIC
 );
+
 -- Create indexes for better query performance
 CREATE INDEX idx_inventory_product ON inventory(product_id);
 CREATE INDEX idx_orders_customer ON orders(customer_id);
