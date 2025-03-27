@@ -14,7 +14,7 @@ CORS(app)
 def create_connection():
     try:
         conn = psycopg2.connect(
-            dbname="Cloud Catalyst",
+            dbname="cloud_catalyst",
             user="cloudadmin",
             password="SeniorProject2!",
             host="localhost",
