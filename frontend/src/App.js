@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
 import "./App.css";
-import Dashboard from "./pages/Dashboard";
+import DashboardPage from "./pages/Dashboard";
 // import BusinessRegistration from "./pages/BusinessRegistration";
 
 const Auth = () => {
@@ -117,11 +117,10 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Auth />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
       </Routes>
     </Router>
   );
 };
 
 export default App;
-
