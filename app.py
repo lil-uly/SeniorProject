@@ -11,7 +11,7 @@ from flask_cors import CORS
 
 app = Flask(__name__, static_folder="static")
 
-CORS(app)
+CORS(app, origins=["http://localhost:3000"])
 
 app_client_id = '3uo9it101gch2ik7jlt8ou5ijb'
 
@@ -45,26 +45,16 @@ def signup():
             SecretHash=secret_hash,
             Username=data['username'],
             Password=data['password'], 
-            UserAttributes=[{
-                'Name': 'name',
-                'Value': data['name'],
-             }, 
-             {
-                'Name': 'email',
-                'Value': data['email'],
-             },
-             {
-                'Name': 'address',
-                'Value': data['address'],
-             },
-             {
-                'Name': 'birthdate',
-                'Value': data['birthday'],
-             },
-             {
-                'Name': 'phone_number',
-                'Value': data['phonenumber']
-             }]
+            UserAttributes=[
+                {'Name': 'name', 'Value': f"{data['firstName']} {data['lastName']}"},
+                {'Name': 'email', 'Value': data['email']},
+                {'Name': 'custom:businessName', 'Value': data['businessName']},
+                {'Name': 'custom:businessType', 'Value': data['businessType']},
+                {'Name': 'address', 'Value': data['address']},
+                {'Name': 'website', 'Value': data['website']},
+                {'Name': 'birthdate', 'Value': data['birthdate']},
+                {'Name': 'phone_number', 'Value': data['phoneNumbers']}
+            ]
         )
         return jsonify({"message": "User is being sent confirmation!", "response": response})
     except Exception as e:
@@ -93,13 +83,22 @@ def login():
     username = data['username']
     password = data['password']
     secret_hash = cognito.secret_hash(username)
+
     try:
         response = client.initiate_auth(
             AuthFlow='USER_PASSWORD_AUTH',
             ClientId=app_client_id,
-            AuthParameters={'USERNAME': username, 'PASSWORD': password, 'SECRET_HASH': secret_hash})
+            AuthParameters={'USERNAME': username, 'PASSWORD': password, 'SECRET_HASH': secret_hash}
+        )
         return jsonify({"message": "User logged in successfully!", "response": response})
+
+    # Handle specific Cognito exceptions
+    except client.exceptions.NotAuthorizedException as e:
+        return jsonify({"error": "Incorrect username or password"}), 400
+    except client.exceptions.UserNotFoundException as e:
+        return jsonify({"error": "User not found"}), 400
     except Exception as e:
+        # Catch all other errors and return a generic error message
         return jsonify({"error": str(e)}), 400
 
 @app.route('/authorize')
