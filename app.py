@@ -45,26 +45,16 @@ def signup():
             SecretHash=secret_hash,
             Username=data['username'],
             Password=data['password'], 
-            UserAttributes=[{
-                'Name': 'name',
-                'Value': data['name'],
-             }, 
-             {
-                'Name': 'email',
-                'Value': data['email'],
-             },
-             {
-                'Name': 'address',
-                'Value': data['address'],
-             },
-             {
-                'Name': 'birthdate',
-                'Value': data['birthday'],
-             },
-             {
-                'Name': 'phone_number',
-                'Value': data['phonenumber']
-             }]
+            UserAttributes=[
+                {'Name': 'name', 'Value': f"{data['firstName']} {data['lastName']}"},
+                {'Name': 'email', 'Value': data['email']},
+                {'Name': 'custom:businessName', 'Value': data['businessName']},
+                {'Name': 'custom:businessType', 'Value': data['businessType']},
+                {'Name': 'address', 'Value': data['address']},
+                {'Name': 'website', 'Value': data['website']},
+                {'Name': 'birthdate', 'Value': data['birthdate']},
+                {'Name': 'phone_number', 'Value': data['phoneNumbers']}
+            ]
         )
         return jsonify({"message": "User is being sent confirmation!", "response": response})
     except Exception as e:

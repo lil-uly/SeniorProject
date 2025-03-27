@@ -3,10 +3,22 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "r
 import axios from "axios";
 import "./App.css";
 import Dashboard from "./pages/Dashboard";
-import BusinessRegistration from "./pages/BusinessRegistration";
+// import BusinessRegistration from "./pages/BusinessRegistration";
 
 const Auth = () => {
-  const [form, setForm] = useState({ username: "", password: "", email: "", name: "", address: "", birthday: "", phonenumber: "" });
+  const [form, setForm] = useState({
+          businessName: '',
+          businessType: '',
+          address: '',
+          website: '',
+          email: '',
+          firstName: '',
+          lastName: '',
+          username: '',
+          password: '',
+          phoneNumbers: '',
+          birthdate: ''
+      });
   const [confirmationCode, setConfirmationCode] = useState("");
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -66,17 +78,34 @@ const Auth = () => {
       <input className="input-field" type="password" name="password" placeholder="Password" onChange={handleChange} />
       <button className="login-button" onClick={handleLogin}>Login</button>
 
-      <h2>Sign Up</h2>
+      <h2>Personal Information</h2>
+      <input className="input-field" type="text" name="firstName" placeholder="First Name" onChange={handleChange} />
+      <input className="input-field" type="text" name="lastName" placeholder="Last Name" onChange={handleChange} />
       <input className="input-field" type="text" name="username" placeholder="Username" onChange={handleChange} />
       <input className="input-field" type="password" name="password" placeholder="Password" onChange={handleChange} />
-      <input className="input-field" type="text" name="name" placeholder="Full Name" onChange={handleChange} />
+      <input className="input-field" type="date" name="birthdate" placeholder="Birthdate" onChange={handleChange} />
+
+      <h2>Business Registration</h2>
+      <input className="input-field" type="text" name="businessName" placeholder="Business Name" onChange={handleChange} />
+      <select
+        name="businessType"
+        value={form.businessType}
+        onChange={handleChange}
+        required
+        placeholder="Business Type">
+        <option value="">Business Type</option>
+        <option value="retail">Retail</option>
+        <option value="service">Service</option>
+        <option value="manufacturing">Manufacturing</option>
+        <option value="other">Other</option>
+      </select>
+      <input className="input-field" type="text" name="address" placeholder="Physical Address" onChange={handleChange} />
+      <input className="input-field" type="text" name="website" placeholder="Website" onChange={handleChange} />
       <input className="input-field" type="email" name="email" placeholder="Email" onChange={handleChange} />
-      <input className="input-field" type="text" name="address" placeholder="Address" onChange={handleChange} />
-      <input className="input-field" type="date" id="birthday" name="birthday" placeholder="Birthday" onChange={handleChange} />
-      <input className="input-field" type="text" name="phonenumber" placeholder="Phone Number" onChange={handleChange} />
-      <button className="login-button" onClick={handleSignup}>Sign Up</button>
-      
-      <h2>Confirm Signup</h2>
+      <input className="input-field" type="text" name="phoneNumbers" placeholder="Phone Number" onChange={handleChange} />
+      <button className="login-button" onClick={handleSignup}>Register</button>
+
+      <h2>Confirm Registration</h2>
       <input className="input-field" type="text" placeholder="Confirmation Code" onChange={(e) => setConfirmationCode(e.target.value)} />
       <button className="login-button" onClick={handleConfirmSignup}>Confirm</button>
     </div>
@@ -89,7 +118,6 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/business-registration" element={<BusinessRegistration />} />
       </Routes>
     </Router>
   );
