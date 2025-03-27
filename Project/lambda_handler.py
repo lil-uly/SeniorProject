@@ -1,65 +1,50 @@
+import boto3
 import json
-import psycopg2
-import os
+
+bedrock = boto3.client(service_name='bedrock-runtime')
 
 def lambda_handler(event, context):
-    # Get slot values
-    slots = event['sessionState']['intent']['slots']
+    # Extract user input from the frontend (e.g., API Gateway)
+    user_input = json.loads(event['body'])
     
-    business_goals = get_slot_value(slots, 'BusinessGoals')
-    business_challenges = get_slot_value(slots, 'BusinessChallenges')
-    employee_count = get_slot_value(slots, 'EmployeeCount')
-    business_tools = get_slot_value(slots, 'BusinessTools')
-    
-    # Store in PostgreSQL database
-    try:
-        # Connect to PostgreSQL database
-        conn = psycopg2.connect(
-            dbname="Cloud Catalyst",
-            user="cloudadmin",
-            password="SeniorProject2!",
-            host="localhost",
-            port="5432"
-        )
-        cur = conn.cursor()
-        
-        # Generate a unique ID or use session ID
-        business_id = event['sessionId']
-        
-        # Store data
-        cur.execute('''
-            INSERT INTO business_profiles (business_id, business_goals, business_challenges, employee_count, business_tools)
-            VALUES (%s, %s, %s, %s, %s)
-        ''', (business_id, business_goals, business_challenges, employee_count, business_tools))
-        
-        # Commit the transaction
-        conn.commit()
-        
-        # Close the cursor and connection
-        cur.close()
-        conn.close()
-        
-        # Return successful response
-        return close(event, 'Fulfilled')
-        
-    except Exception as e:
-        print(e)
-        return close(event, 'Failed')
-
-def get_slot_value(slots, slot_name):
-    if slots and slot_name in slots and slots[slot_name]:
-        return slots[slot_name]['value']['interpretedValue']
-    return None
-
-def close(event, fulfillment_state):
-    return {
-        'sessionState': {
-            'dialogAction': {
-                'type': 'Close'
-            },
-            'intent': {
-                'name': event['sessionState']['intent']['name'],
-                'state': fulfillment_state
-            }
+    # Step 1: Ask for goals (if not provided)
+    if 'goals' not in user_input:
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'response': "What are your top three business goals? (e.g., 'Increase sales, Reduce costs, Improve customer retention')"
+            })
         }
+    
+    # Step 2: Generate tips if goals are provided
+    goals = user_input['goals'].split(',')[:3]  # Get top 3 goals
+    
+    # Call Bedrock to generate tips
+    prompt = f"""
+    You are a business advisor. Provide 3 actionable tips for each of these business goals:
+    Goals: {', '.join(goals)}
+    
+    Format the response as:
+    Goal 1: [Goal]
+    - Tip 1: [Tip]
+    - Tip 2: [Tip]
+    - Tip 3: [Tip]
+    """
+    
+    response = bedrock.invoke_model(
+        modelId='anthropic.claude-v2',
+        body=json.dumps({
+            "prompt": prompt,
+            "max_tokens_to_sample": 500
+        })
+    )
+    
+    # Parse and return the response
+    tips = json.loads(response['body'].read())['completion']
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps({
+            'response': tips
+        })
     }

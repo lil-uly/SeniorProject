@@ -92,6 +92,29 @@
     fetchDashboardData(); // Fetch dashboard data when the page loads
   </script>
   
+  <!DOCTYPE html>
+<html>
+<body>
+  <h2>Business Goal Advisor</h2>
+  <input type="text" id="goals" placeholder="Enter top 3 goals (comma-separated)">
+  <button onclick="getTips()">Get Tips</button>
+  <div id="response"></div>
+  
+  <script>
+    async function getTips() {
+      const goals = document.getElementById('goals').value;
+      const response = await fetch('YOUR_API_GATEWAY_URL', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goals })
+      });
+      const data = await response.json();
+      document.getElementById('response').innerHTML = 
+        `<pre>${JSON.parse(data.response)}</pre>`;
+    }
+  </script>
+</body>
+</html>
   <!-- Footer -->
 <footer>
   <p>&copy; 2025 Business Web App</p>
