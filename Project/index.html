@@ -78,20 +78,51 @@
   </div>
   
   <div>
-    <h2>Submit an Order</h2>
-    <label for="customer-name">Customer Name:</label>
-    <input id="customer-name" type="text" />
-    <label for="product">Product:</label>
-    <input id="product" type="text" />
-    <label for="quantity">Quantity:</label>
-    <input id="quantity" type="number" />
-    <button onclick="submitOrder()">Submit Order</button>
-  </div>
-  
-  <script>
-    fetchDashboardData(); // Fetch dashboard data when the page loads
-  </script>
-  
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Business Goal Advisor</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+            input { width: 100%; padding: 10px; margin: 10px 0; }
+            button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+            button:hover { background: #0056b3; }
+            #response { margin-top: 20px; white-space: pre-wrap; background: #f5f5f5; padding: 10px; }
+        </style>
+    </head>
+    <body>
+        <h2>Business Goal Advisor</h2>
+        <p>Enter your top 3 business goals (comma-separated):</p>
+        <input type="text" id="goals" placeholder="Example: Increase sales, Reduce costs, Improve retention">
+        <button onclick="getTips()">Get Tips</button>
+        <div id="response"></div>
+    
+        <script>
+            async function getTips() {
+                const goals = document.getElementById('goals').value;
+                if (!goals.trim()) {
+                    alert("Please enter at least one goal!");
+                    return;
+                }
+    
+                const apiUrl = "https://q92dqzdkmb.execute-api.us-east-1.amazonaws.com/chatbot-dev"; // API URL
+                
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ goals })
+                    });
+                    
+                    const data = await response.json();
+                    document.getElementById('response').innerHTML = `<pre>${JSON.parse(data.response)}</pre>`;
+                } catch (error) {
+                    document.getElementById('response').innerHTML = `Error: ${error.message}`;
+                }
+            }
+        </script>
+    </body>
+    </html>
   <!-- Footer -->
 <footer>
   <p>&copy; 2025 Business Web App</p>
