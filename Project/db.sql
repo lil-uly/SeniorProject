@@ -84,7 +84,26 @@ CREATE TABLE businesses (
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     number_of_employees INTEGER,
-    annual_revenue NUMERIC
+    annual_revenue NUMERIC DEFAULT 0
+);
+
+-- Monthly revenue table
+CREATE TABLE monthly_revenue (
+    id SERIAL PRIMARY KEY,
+    business_name VARCHAR(100) NOT NULL,
+    year INT NOT NULL,
+    jan DECIMAL(10, 2) DEFAULT 0,
+    feb DECIMAL(10, 2) DEFAULT 0,
+    mar DECIMAL(10, 2) DEFAULT 0,
+    apr DECIMAL(10, 2) DEFAULT 0,
+    may DECIMAL(10, 2) DEFAULT 0,
+    jun DECIMAL(10, 2) DEFAULT 0,
+    jul DECIMAL(10, 2) DEFAULT 0,
+    aug DECIMAL(10, 2) DEFAULT 0,
+    sep DECIMAL(10, 2) DEFAULT 0,
+    oct DECIMAL(10, 2) DEFAULT 0,
+    nov DECIMAL(10, 2) DEFAULT 0,
+    dec DECIMAL(10, 2) DEFAULT 0
 );
 
 -- Create indexes for better query performance

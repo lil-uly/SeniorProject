@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Chart as ChartJS, LineController, LineElement, PointElement, BarController, BarElement, ArcElement, PieController, CategoryScale, LinearScale, Title, Tooltip, Legend } from "chart.js";
 import "./DashboardPage.css";
 
+
 // Register all necessary components and controllers
 ChartJS.register(
   LineController,

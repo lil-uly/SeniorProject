@@ -1,12 +1,12 @@
 from flask import Flask, redirect, url_for, session, request, jsonify, render_template
 import boto3
 from authlib.integrations.flask_client import OAuth
-import config
+import Project.config as config
 import os
 import sys
 import hmac, hashlib, base64 
-import cognito_idp
-from cognito_idp import CognitoIdentityProviderWrapper
+import Project.cognito_idp as cognito_idp
+from Project.cognito_idp import CognitoIdentityProviderWrapper
 from flask_cors import CORS
 import json
 import uuid  # Added for session ID generation
