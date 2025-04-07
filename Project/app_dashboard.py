@@ -10,6 +10,36 @@ from authlib.integrations.flask_client import OAuth
 app = Flask(__name__)
 CORS(app)
 
+# API to handle business registration
+@app.route('/api/register-business', methods=['POST'])
+def register_business():
+    data = request.json
+    conn = create_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute('''
+                INSERT INTO businesses (business_name, business_type, address, business_email, first_name, last_name)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (
+                data['businessName'],
+                data['businessType'],
+                data['physicalAddress'],
+                data['email'],
+                data['firstName'],
+                data['lastName']
+            ))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return jsonify({"message": "Business registered successfully!"}), 201
+        except Exception as e:
+            print(f"An error occurred while inserting data: {e}")
+            return jsonify({"error": "Failed to register business"}), 500
+    else:
+        return jsonify({"error": "Failed to connect to the database"}), 500
+    
+
 # Database connection function
 def create_connection():
     try:
@@ -24,6 +54,7 @@ def create_connection():
     except Exception as e:
         print(f"An error occurred while connecting to the database: {e}")
         return None
+
 
 # Fetch business metrics from the database
 def fetch_business_metrics():
@@ -146,9 +177,7 @@ def query_agent(prompt):
     
     return response['completion']
 
-# Example usage
-result = query_agent("Analyze the order fulfillment process and suggest automation opportunities")
-print(result)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

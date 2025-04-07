@@ -21,10 +21,35 @@ const BusinessRegistration = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission logic here
-        console.log(formData);
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/register-business', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                setFormData({
+                    businessName: '',
+                    businessType: '',
+                    physicalAddress: '',
+                    websiteAddress: '',
+                    email: '',
+                    firstName: '',
+                    lastName: ''
+                });
+            } else {
+                alert(data.error || 'Failed to register business');
+            }
+        } catch (error) {
+            console.error('Error registering business:', error);
+            alert('An error occurred while registering the business.');
+        }
     };
 
     return (
