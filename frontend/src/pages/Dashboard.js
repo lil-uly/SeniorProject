@@ -25,12 +25,28 @@ const DashboardPage = () => {
   const [inventoryLevels, setInventoryLevels] = useState({});
   const [recommendations] = useState(["Product A", "Product B", "Product C", "Product D"]);
 
+  const [chatInput, setChatInput] = useState(''); // Chat input state
+  const [chatResponses, setChatResponses] = useState([]); // Chat responses state
+
   const salesChartRef = useRef(null);
   const engagementChartRef = useRef(null);
   const inventoryChartRef = useRef(null);
   const salesChartInstance = useRef(null);
   const engagementChartInstance = useRef(null);
   const inventoryChartInstance = useRef(null);
+
+  const chatContainerRef = useRef(null);
+
+  // Scroll to the bottom of the chat container
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatResponses]);
 
   // Fetch dashboard data from API
   useEffect(() => {
@@ -43,6 +59,37 @@ const DashboardPage = () => {
       })
       .catch(error => console.error("Error fetching dashboard data:", error));
   }, []);
+
+  // Handle chat input change
+  const handleChatInputChange = (e) => {
+    setChatInput(e.target.value);
+  };
+
+  // Handle chat submission
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input_text: chatInput }),
+      });
+      const data = await response.json();
+
+      if (data.messages) {
+        setChatResponses((prev) => [...prev, { user: chatInput, bot: data.messages[0].content }]);
+      } else {
+        setChatResponses((prev) => [...prev, { user: chatInput, bot: 'Sorry, I didn\'t understand that.' }]);
+      }
+    } catch (error) {
+      console.error('Error communicating with chatbot:', error);
+      setChatResponses((prev) => [...prev, { user: chatInput, bot: 'Error connecting to chatbot.' }]);
+    }
+
+    setChatInput('');
+  };
 
   // Initialize charts
   useEffect(() => {
@@ -144,6 +191,31 @@ const DashboardPage = () => {
           </div>
         </section>
 
+
+        <section id="chatbot" className="tab-content">
+          <h1>Chatbot</h1>
+          <div className="chat-container" ref={chatContainerRef}>
+            {chatResponses.map((response, index) => (
+              <div key={index} className="chat-message">
+                <strong>User:</strong> {response.user}
+                <br />
+                <strong>Bot:</strong> {response.bot}
+              </div>
+            ))}
+          </div>
+          <form onSubmit={handleChatSubmit}>
+            <input
+              type="text"
+              value={chatInput}
+              onChange={handleChatInputChange}
+              placeholder="Type your message..."
+            />
+            <button type="submit">Send</button>
+          </form>
+        </section>
+      </main>
+
+
         <section id="settings" className="tab-content">
           <h1>Settings</h1>
           <p>Manage backups, notifications, and access control.</p>
@@ -160,7 +232,7 @@ const DashboardPage = () => {
             <div id="recommendations" className="grid"></div>
           </div>
         </section>
-      </main>
+
 
       <div>
         <h2>Dashboard</h2>
@@ -173,6 +245,7 @@ const DashboardPage = () => {
           ))}
         </ul>
       </div>
+
 
       <footer>
         <p>&copy; 2025 Business Web App</p>
