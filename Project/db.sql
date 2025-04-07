@@ -84,7 +84,7 @@ CREATE TABLE businesses (
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     number_of_employees INTEGER,
-    annual_revenue NUMERIC
+    annual_revenue NUMERIC DEFAULT 0
 );
 
 -- Monthly revenue table

@@ -88,3 +88,4 @@ if __name__ == "__main__":
     csv_file_path = "Small_Business_Test_Data.csv"
     csv_monthly_revenue_path = "Monthly_Revenue_Test_Data.csv"
     insert_business_data_from_csv(csv_file_path)
+    insert_monthly_revenue_data_from_csv(csv_monthly_revenue_path)
