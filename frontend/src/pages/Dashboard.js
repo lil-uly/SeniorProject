@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Chart as ChartJS, LineController, LineElement, PointElement, BarController, BarElement, ArcElement, PieController, CategoryScale, LinearScale, Title, Tooltip, Legend } from "chart.js";
+import "./DashboardPage.css";
+
 
 // Register all necessary components and controllers
 ChartJS.register(
@@ -189,6 +191,7 @@ const DashboardPage = () => {
           </div>
         </section>
 
+
         <section id="chatbot" className="tab-content">
           <h1>Chatbot</h1>
           <div className="chat-container" ref={chatContainerRef}>
@@ -212,6 +215,38 @@ const DashboardPage = () => {
         </section>
       </main>
 
+
+        <section id="settings" className="tab-content">
+          <h1>Settings</h1>
+          <p>Manage backups, notifications, and access control.</p>
+        </section>
+
+        <section id="customer-dashboard" className="tab-content">
+          <h1>Customer Dashboard</h1>
+          <div>
+            <h2>Order History</h2>
+            <ul id="order-history"></ul>
+          </div>
+          <div>
+            <h2>Recommendations</h2>
+            <div id="recommendations" className="grid"></div>
+          </div>
+        </section>
+
+
+      <div>
+        <h2>Dashboard</h2>
+        <p>Sales: <span>{`$${sales}`}</span></p>
+        <p>Customer Engagement: <span>{`${customerEngagement}%`}</span></p>
+        <h3>Inventory Levels:</h3>
+        <ul>
+          {Object.keys(inventoryLevels).map((item, index) => (
+            <li key={index}>{item}: {inventoryLevels[item]}</li>
+          ))}
+        </ul>
+      </div>
+
+
       <footer>
         <p>&copy; 2025 Business Web App</p>
       </footer>
@@ -220,4 +255,6 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+
+
 
