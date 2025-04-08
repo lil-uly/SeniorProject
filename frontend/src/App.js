@@ -33,11 +33,12 @@ const Auth = () => {
       const response = await axios.post("http://127.0.0.1:5000/signup", form);
       alert(response.data.message);
     } catch (error) {
-      alert(error.response ? error.response.data.error : "An error occurred");
+      alert(error.response ? error.response.data.error : "Sign up failed. A confirmation code was not sent.");
     }
   };
 
-  const handleConfirmSignup = async () => {
+  const handleConfirmSignup = async (e) => {
+    e.preventDefault();
     try {
       const response = await axios.post("http://127.0.0.1:5000/confirm-sign-up", {
         username: form.username,
@@ -45,8 +46,21 @@ const Auth = () => {
       });
       alert(response.data.message);
       setIsConfirmed(true);
+
+      try {
+        const res = await fetch('http://localhost:5000/api/save-business', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
+        const result = await res.json();
+        console.log('Saved to DB:', result);
+      } catch (err) {
+        console.error('Submission error:', err);
+      }
+
     } catch (error) {
-      alert(error.response ? error.response.data.error : "An error occurred");
+      alert(error.response ? error.response.data.error : "Couldn't confirm user");
     }
   };
 
