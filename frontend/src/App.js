@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
 import "./App.css";
 import DashboardPage from "./pages/Dashboard";
-// import BusinessRegistration from "./pages/BusinessRegistration";
+import ProfilePage from "./pages/ProfilePage";
+
 
 const Auth = () => {
   const [form, setForm] = useState({
@@ -127,11 +128,22 @@ const Auth = () => {
 };
 
 const App = () => {
+  const [username, setUsername] = useState("testuser"); // Replace with actual username logic
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+  };
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/profile"
+          element={<ProfilePage username={username} onSignOut={handleSignOut} />}
+        />
       </Routes>
     </Router>
   );
