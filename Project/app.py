@@ -224,51 +224,5 @@ def create_connection():
         print(f"Database connection error: {e}")
         return None
 
-# API endpoint to save business data
-@app.route('/api/save-business', methods=['POST'])
-def save_business():
-    data = request.json
-    business_name = data.get('business_name')
-    business_type = data.get('business_type')
-    address = data.get('address')
-    business_email = data.get('business_email')
-    first_name = data.get('first_name')
-    last_name = data.get('last_name')
-    number_of_employees = data.get('number_of_employees')
-    annual_revenue = data.get('annual_revenue')
-
-    conn = create_connection()
-    if conn:
-        try:
-            cur = conn.cursor(cursor_factory=RealDictCursor)
-            query = """
-                INSERT INTO businesses (
-                    business_name, business_type, address, business_email,
-                    first_name, last_name, number_of_employees, annual_revenue
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING business_id
-            """
-            values = (
-                business_name,
-                business_type,
-                address,
-                business_email,
-                first_name,
-                last_name,
-                int(number_of_employees),
-                float(annual_revenue)
-            )
-            cur.execute(query, values)
-            conn.commit()
-            business_id = cur.fetchone()['business_id']
-            cur.close()
-            conn.close()
-            return jsonify({"message": "Business saved!", "business_id": business_id}), 201
-        except Exception as e:
-            print(f"Insert error: {e}")
-            return jsonify({"error": "DB insert failed"}), 500
-    else:
-        return jsonify({"error": "Failed to connect to the database"}), 500
-
 if __name__ == '__main__':
     app.run(debug=True)
