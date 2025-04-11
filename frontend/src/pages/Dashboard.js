@@ -99,7 +99,7 @@ const DashboardPage = () => {
             {
               label: "Inventory",
               data: Object.values(inventoryLevels),
-              backgroundColor: ["red", "yellow", "blue", "purple"],
+              backgroundColor: ["red", "yellow", "blue", "green"],
             },
           ],
         },
@@ -120,6 +120,7 @@ const DashboardPage = () => {
           <ul>
             <li><a href="#dashboard">Dashboard</a></li>
             <li><a href="#settings">Settings</a></li>
+            <li><a href="/profile">Profile</a></li>
             <li><a href="#support">Support</a></li>
           </ul>
         </nav>

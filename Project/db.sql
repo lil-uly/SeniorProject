@@ -83,10 +83,9 @@ CREATE TABLE businesses (
     business_email VARCHAR(255),
     first_name VARCHAR(255),
     last_name VARCHAR(255),
-    number_of_employees INTEGER,
-    annual_revenue NUMERIC DEFAULT 0
+    number_of_employees INTEGER DEFAULT 0,
+    annual_revenue NUMERIC DEFAULT 0.0
 );
-
 -- Monthly revenue table
 CREATE TABLE monthly_revenue (
     id SERIAL PRIMARY KEY,
