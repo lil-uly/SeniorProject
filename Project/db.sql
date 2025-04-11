@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS customers CASCADE;
 DROP TABLE IF EXISTS customer_engagement CASCADE;
 DROP TABLE IF EXISTS businesses CASCADE;
+DROP TABLE IF EXISTS monthly_revenue CASCADE;
 
 
 -- Create the tables
@@ -86,23 +87,24 @@ CREATE TABLE businesses (
     number_of_employees INTEGER DEFAULT 0,
     annual_revenue NUMERIC DEFAULT 0.0
 );
+
 -- Monthly revenue table
 CREATE TABLE monthly_revenue (
-    id SERIAL PRIMARY KEY,
-    business_name VARCHAR(100) NOT NULL,
-    year INT NOT NULL,
-    jan DECIMAL(10, 2) DEFAULT 0,
-    feb DECIMAL(10, 2) DEFAULT 0,
-    mar DECIMAL(10, 2) DEFAULT 0,
-    apr DECIMAL(10, 2) DEFAULT 0,
-    may DECIMAL(10, 2) DEFAULT 0,
-    jun DECIMAL(10, 2) DEFAULT 0,
-    jul DECIMAL(10, 2) DEFAULT 0,
-    aug DECIMAL(10, 2) DEFAULT 0,
-    sep DECIMAL(10, 2) DEFAULT 0,
-    oct DECIMAL(10, 2) DEFAULT 0,
-    nov DECIMAL(10, 2) DEFAULT 0,
-    dec DECIMAL(10, 2) DEFAULT 0
+    id SERIAL PRIMARY KEY, -- Unique identifier for each row
+    business_name VARCHAR(255) NOT NULL, -- Name of the business
+    year INT NOT NULL, -- Year of the revenue data
+    jan NUMERIC(12, 2) NOT NULL, -- Revenue for January
+    feb NUMERIC(12, 2) NOT NULL, -- Revenue for February
+    mar NUMERIC(12, 2) NOT NULL, -- Revenue for March
+    apr NUMERIC(12, 2) NOT NULL, -- Revenue for April
+    may NUMERIC(12, 2) NOT NULL, -- Revenue for May
+    jun NUMERIC(12, 2) NOT NULL, -- Revenue for June
+    jul NUMERIC(12, 2) NOT NULL, -- Revenue for July
+    aug NUMERIC(12, 2) NOT NULL, -- Revenue for August
+    sep NUMERIC(12, 2) NOT NULL, -- Revenue for September
+    oct NUMERIC(12, 2) NOT NULL, -- Revenue for October
+    nov NUMERIC(12, 2) NOT NULL, -- Revenue for November
+    dec NUMERIC(12, 2) NOT NULL -- Revenue for December
 );
 
 -- Create indexes for better query performance
@@ -111,3 +113,9 @@ CREATE INDEX idx_orders_customer ON orders(customer_id);
 CREATE INDEX idx_order_items_order ON order_items(order_id);
 CREATE INDEX idx_engagement_customer ON customer_engagement(customer_id);
 CREATE INDEX idx_engagement_timestamp ON customer_engagement(timestamp);
+
+-- Load test data into monthly_revenue table
+COPY monthly_revenue(business_name, year, jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec)
+FROM 'Monthly_Revenue_Test_Data.csv'
+DELIMITER ','
+CSV HEADER;
