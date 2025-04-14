@@ -26,6 +26,8 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState("login"); // Track active tab
   const navigate = useNavigate(); // Now inside a Router-wrapped component
 
+
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -65,7 +67,7 @@ const Auth = () => {
       alert(error.response ? error.response.data.error : "Couldn't confirm user");
     }
   };
-
+ 
   const handleLogin = async () => {
     try {
       console.log("Form Data: ", form); // Log the form data for debugging
@@ -236,6 +238,13 @@ const Auth = () => {
 };
 
 const App = () => {
+  const [username, setUsername] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleSignOut = () => {
+    localStorage.clear();
+    setIsAuthenticated(false);
+  };
   return (
     <Router>
       <Routes>
@@ -248,6 +257,7 @@ const App = () => {
         <Route path="/chat" element={<CCChatBox />} />
       </Routes>
     </Router>
+  
   );
 };
 
