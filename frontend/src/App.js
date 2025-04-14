@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "r
 import axios from "axios";
 import "./App.css";
 import DashboardPage from "./pages/Dashboard";
-// import BusinessRegistration from "./pages/BusinessRegistration";
+import ProfilePage from "./pages/ProfilePage";
+import CCChatBox from "./pages/CCChatBox";
 
 const Auth = () => {
   const [form, setForm] = useState({
@@ -76,7 +77,7 @@ const Auth = () => {
         localStorage.setItem("idToken", response.data.response.AuthenticationResult.IdToken);
         localStorage.setItem("refreshToken", response.data.response.AuthenticationResult.RefreshToken);
         setIsAuthenticated(true);
-        navigate("/dashboard");
+        navigate("/profile");
       } else {
         alert("Invalid login response format");
       }
@@ -240,6 +241,11 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/profile"
+          element={<ProfilePage username={username} onSignOut={handleSignOut} />}
+        />
+        <Route path="/chat" element={<CCChatBox />} />
       </Routes>
     </Router>
   );
