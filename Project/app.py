@@ -1,16 +1,18 @@
 from flask import Flask, redirect, url_for, session, request, jsonify, render_template
 import boto3
 from authlib.integrations.flask_client import OAuth
-import Project.config as config
+import config as config
 import os
 import sys
 import hmac, hashlib, base64 
-import Project.cognito_idp as cognito_idp
-from Project.cognito_idp import CognitoIdentityProviderWrapper
+import cognito_idp as cognito_idp
+from cognito_idp import CognitoIdentityProviderWrapper
 from flask_cors import CORS
 import json
 import uuid  # Added for session ID generation
 import requests  # Ensure you have requests installed
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 # Initialize Flask app
 app = Flask(__name__, static_folder="static")
@@ -206,6 +208,21 @@ def query_agent(prompt):
     )
 
     return response['completion']
+
+# Database connection function
+def create_connection():
+    try:
+        conn = psycopg2.connect(
+            dbname="cloud_catalyst",
+            user="cloudadmin",
+            password="SeniorProject2!",
+            host="localhost",
+            port="5432"
+        )
+        return conn
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        return None
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,28 @@
+.profile-page {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.profile-page h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.profile-page p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.sign-out-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: white;
+  background-color: red;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.sign-out-button:hover {
+  background-color: darkred;
+}

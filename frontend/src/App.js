@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import axios from "axios";
 import "./App.css";
 import DashboardPage from "./pages/Dashboard";
-// import BusinessRegistration from "./pages/BusinessRegistration";
+import ProfilePage from "./pages/ProfilePage";
+
 
 const Auth = () => {
   const [form, setForm] = useState({
@@ -33,11 +34,12 @@ const Auth = () => {
       const response = await axios.post("http://127.0.0.1:5000/signup", form);
       alert(response.data.message);
     } catch (error) {
-      alert(error.response ? error.response.data.error : "An error occurred");
+      alert(error.response ? error.response.data.error : "Sign up failed. A confirmation code was not sent.");
     }
   };
 
-  const handleConfirmSignup = async () => {
+  const handleConfirmSignup = async (e) => {
+    e.preventDefault();
     try {
       const response = await axios.post("http://127.0.0.1:5000/confirm-sign-up", {
         username: form.username,
@@ -45,8 +47,9 @@ const Auth = () => {
       });
       alert(response.data.message);
       setIsConfirmed(true);
+
     } catch (error) {
-      alert(error.response ? error.response.data.error : "An error occurred");
+      alert(error.response ? error.response.data.error : "Couldn't confirm user");
     }
   };
 
@@ -71,53 +74,79 @@ const Auth = () => {
     }
   };
 
+
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <input className="input-field" type="text" name="username" placeholder="Username" onChange={handleChange} />
-      <input className="input-field" type="password" name="password" placeholder="Password" onChange={handleChange} />
-      <button className="login-button" onClick={handleLogin}>Login</button>
+    <div>
+      <div className="login-container">
+        <h2>Login</h2>
+        <input className="input-field" type="text" name="username" placeholder="Username" onChange={handleChange} />
+        <input className="input-field" type="password" name="password" placeholder="Password" onChange={handleChange} />
+        <button className="login-button" onClick={handleLogin}>
+          Login
+        </button>
+      </div>
 
-      <h2>Personal Information</h2>
-      <input className="input-field" type="text" name="firstName" placeholder="First Name" onChange={handleChange} />
-      <input className="input-field" type="text" name="lastName" placeholder="Last Name" onChange={handleChange} />
-      <input className="input-field" type="text" name="username" placeholder="Username" onChange={handleChange} />
-      <input className="input-field" type="password" name="password" placeholder="Password" onChange={handleChange} />
-      <input className="input-field" type="date" name="birthdate" placeholder="Birthdate" onChange={handleChange} />
+      <div className="signup-container">
+        <h2>Sign Up</h2>
+        <input className="input-field" type="text" name="firstName" placeholder="First Name" onChange={handleChange} />
+        <input className="input-field" type="text" name="lastName" placeholder="Last Name" onChange={handleChange} />
+        <input className="input-field" type="text" name="username" placeholder="Username" onChange={handleChange} />
+        <input className="input-field" type="password" name="password" placeholder="Password" onChange={handleChange} />
+        <input className="input-field" type="date" name="birthdate" placeholder="Birthdate" onChange={handleChange} />
+      </div>
 
-      <h2>Business Registration</h2>
-      <input className="input-field" type="text" name="businessName" placeholder="Business Name" onChange={handleChange} />
-      <select
-        name="businessType"
-        value={form.businessType}
-        onChange={handleChange}
-        required
-        placeholder="Business Type">
-        <option value="">Business Type</option>
-        <option value="retail">Retail</option>
-        <option value="service">Service</option>
-        <option value="manufacturing">Manufacturing</option>
-        <option value="other">Other</option>
-      </select>
-      <input className="input-field" type="text" name="address" placeholder="Physical Address" onChange={handleChange} />
-      <input className="input-field" type="text" name="website" placeholder="Website" onChange={handleChange} />
-      <input className="input-field" type="email" name="email" placeholder="Email" onChange={handleChange} />
-      <input className="input-field" type="text" name="phoneNumbers" placeholder="Phone Number" onChange={handleChange} />
-      <button className="login-button" onClick={handleSignup}>Register</button>
+      <div className="business-registration-container">
+        <h2>Business Registration</h2>
+        <input className="input-field" type="text" name="businessName" placeholder="Business Name" onChange={handleChange} />
+        <select name="businessType" value={form.businessType} onChange={handleChange} required>
+          <option value="">Business Type</option>
+          <option value="retail">Retail</option>
+          <option value="service">Service</option>
+          <option value="manufacturing">Manufacturing</option>
+          <option value="other">Other</option>
+        </select>
+        <input className="input-field" type="text" name="address" placeholder="Physical Address" onChange={handleChange} />
+        <input className="input-field" type="text" name="website" placeholder="Website" onChange={handleChange} />
+        <input className="input-field" type="email" name="email" placeholder="Email" onChange={handleChange} />
+        <input className="input-field" type="text" name="phoneNumbers" placeholder="Phone Number" onChange={handleChange} />
+        <button className="login-button" onClick={handleSignup}>
+          Register
+        </button>
+      </div>
 
-      <h2>Confirm Registration</h2>
-      <input className="input-field" type="text" placeholder="Confirmation Code" onChange={(e) => setConfirmationCode(e.target.value)} />
-      <button className="login-button" onClick={handleConfirmSignup}>Confirm</button>
+      <div className="confirmation-container">
+        <h2>Confirm Registration</h2>
+        <input
+          className="input-field"
+          type="text"
+          placeholder="Confirmation Code"
+          onChange={(e) => setConfirmationCode(e.target.value)}
+        />
+        <button className="login-button" onClick={handleConfirmSignup}>
+          Confirm
+        </button>
+      </div>
     </div>
   );
 };
 
 const App = () => {
+  const [username, setUsername] = useState("testuser"); // Replace with actual username logic
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  const handleSignOut = () => {
+    setIsAuthenticated(false);
+  };
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/profile"
+          element={<ProfilePage username={username} onSignOut={handleSignOut} />}
+        />
       </Routes>
     </Router>
   );
