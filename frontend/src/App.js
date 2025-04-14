@@ -4,7 +4,7 @@ import axios from "axios";
 import "./App.css";
 import DashboardPage from "./pages/Dashboard";
 import ProfilePage from "./pages/ProfilePage";
-
+import Settings from "./pages/Settings"; 
 
 const Auth = () => {
   const [form, setForm] = useState({
@@ -147,6 +147,7 @@ const App = () => {
           path="/profile"
           element={<ProfilePage username={username} onSignOut={handleSignOut} />}
         />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );
