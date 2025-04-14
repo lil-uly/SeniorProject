@@ -64,7 +64,7 @@ const Auth = () => {
         localStorage.setItem("idToken", response.data.response.AuthenticationResult.IdToken);
         localStorage.setItem("refreshToken", response.data.response.AuthenticationResult.RefreshToken);
         setIsAuthenticated(true);
-        navigate("/dashboard");
+        navigate("/profile");
       } else {
         alert("Invalid login response format");
       }
