@@ -4,6 +4,9 @@ import axios from "axios";
 import "./App.css";
 import DashboardPage from "./pages/Dashboard";
 import ProfilePage from "./pages/ProfilePage";
+import CCChatBox from "./pages/CCChatBox";
+
+
 
 
 const Auth = () => {
@@ -147,6 +150,7 @@ const App = () => {
           path="/profile"
           element={<ProfilePage username={username} onSignOut={handleSignOut} />}
         />
+        <Route path="/chat" element={<CCChatBox />} />
       </Routes>
     </Router>
   );
