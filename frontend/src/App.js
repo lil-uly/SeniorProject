@@ -5,6 +5,7 @@ import "./App.css";
 import DashboardPage from "./pages/Dashboard";
 import ProfilePage from "./pages/ProfilePage";
 import CCChatBox from "./pages/CCChatBox";
+import Settings from "./pages/Settings"; 
 
 const Auth = () => {
   const [form, setForm] = useState({
@@ -254,7 +255,6 @@ const App = () => {
           path="/profile"
           element={<ProfilePage username={username} onSignOut={handleSignOut} />}
         />
-        <Route path="/chat" element={<CCChatBox />} />
       </Routes>
     </Router>
   
