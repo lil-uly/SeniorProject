@@ -10,8 +10,40 @@ body {
   padding: 20px;
 }
 
-/* Login Container */
-.login-container {
+/* Tabs */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.tabs button {
+  padding: 14px 20px;
+  margin: 0 10px;
+  border: 2px solid #d3d3d3;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  background: #f8f9fa;
+  color: #333;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  outline: none;
+}
+
+.tabs button.active {
+  background: linear-gradient(to right, #82aaff, #99c0ff);
+  color: white;
+  border-color: #82aaff;
+}
+
+.tabs button:hover {
+  background: #eef3ff;
+}
+
+/* Login/Signup/Confirmation/Business Registration Container */
+.login-container, .signup-container, .business-registration-container, .confirmation-container {
   width: 90%;
   max-width: 500px;
   overflow: visible;
@@ -22,53 +54,9 @@ body {
   box-sizing: border-box;
 }
 
-/* Signup Container */
-.signup-container {
-  width: 90%;
-  max-width: 500px;
-  overflow: visible;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-}
-/* Login Container */
-.business-registration-container {
-  width: 90%;
-  max-width: 500px;
-  overflow: visible;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-}
-
-/* Login Container */
-.confirmation-container {
-  width: 90%;
-  max-width: 500px;
-  overflow: visible;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-}
-
-.login-container:hover {
-  transform: translateY(-5px);
-}
-
-.signup-container:hover {
-  transform: translateY(-5px);
-}
-
-.business-registration-container:hover {
-  transform: translateY(-5px);
-}
-
+.login-container:hover,
+.signup-container:hover,
+.business-registration-container:hover,
 .confirmation-container:hover {
   transform: translateY(-5px);
 }
@@ -91,9 +79,9 @@ h2 {
 
 /* Input and Select Fields */
 .input-field, select {
-  width: calc(100% - 20px); /* Ensures it fits inside the container with padding */
+  width: calc(100% - 20px);
   padding: 14px;
-  margin: 16px 0; /* Increased spacing */
+  margin: 16px 0;
   border: 2px solid #d3d3d3;
   border-radius: 8px;
   outline: none;
