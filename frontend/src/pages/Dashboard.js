@@ -118,8 +118,8 @@ const DashboardPage = () => {
         </div>
         <nav>
           <ul>
-            <li><a href="#dashboard">Dashboard</a></li>
-            <li><a href="#settings">Settings</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/settings">Settings</a></li>
             <li><a href="/profile">Profile</a></li>
             <li><a href="#support">Support</a></li>
           </ul>
