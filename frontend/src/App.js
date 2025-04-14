@@ -4,6 +4,7 @@ import axios from "axios";
 import "./App.css";
 import DashboardPage from "./pages/Dashboard";
 // import BusinessRegistration from "./pages/BusinessRegistration";
+import Chatbot from "./pages/Chatbot";
 
 const Auth = () => {
   const [form, setForm] = useState({
@@ -130,18 +131,11 @@ const Auth = () => {
 };
 
 const App = () => {
-  const [username, setUsername] = useState("testuser"); // Replace with actual username logic
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-
-  const handleSignOut = () => {
-    setIsAuthenticated(false);
-  };
-
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Auth />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/chatbot" element={<Chatbot />} /> {/* Add Chatbot route */}
       </Routes>
     </Router>
   );

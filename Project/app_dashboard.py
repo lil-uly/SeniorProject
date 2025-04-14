@@ -6,9 +6,122 @@ import requests
 import psycopg2
 from flask_cors import CORS
 from authlib.integrations.flask_client import OAuth
+from chatbot_config import BEDROCK_AGENT_CONFIG
+import uuid
+import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
+logger.error("Error message", exc_info=True)
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"])  # Allow requests from the frontend
+
+# Initialize AWS Bedrock clients
+bedrock_runtime = boto3.client(
+    service_name="bedrock-runtime",
+    region_name=os.getenv("AWS_REGION", "us-east-1"),
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+)
+
+bedrock_agent = boto3.client(
+    service_name="bedrock-agent-runtime",
+    region_name=os.getenv("AWS_REGION", "us-east-1"),
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+)
+
+# Store conversation history
+conversation_sessions = {}
+
+# Chat endpoint
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    try:
+        data = request.json
+        user_message = data.get('message', '')
+        session_id = data.get('sessionId', 'default_session')
+        
+        # Initialize session if it doesn't exist
+        if session_id not in conversation_sessions:
+            conversation_sessions[session_id] = []
+        
+        # Add user message to conversation history
+        conversation_sessions[session_id].append({
+            "role": "user",
+            "content": user_message
+        })
+        
+        # Prepare parameters for Bedrock Agent
+        params = {
+            "agentId": os.getenv("BEDROCK_AGENT_ID"),
+            "agentAliasId": os.getenv("BEDROCK_AGENT_ALIAS_ID"),
+            "sessionId": session_id,
+            "inputText": user_message
+        }
+        
+        # Invoke the Bedrock Agent
+        response = bedrock_agent.invoke_agent(**params)
+        
+        # Process the response
+        completion_reason = response.get('completionReason', '')
+        agent_response = ''
+        
+        # Extract response from chunks if streaming
+        if 'chunks' in response:
+            for chunk in response['chunks']:
+                if 'chunk' in chunk and 'bytes' in chunk['chunk']:
+                    chunk_data = json.loads(chunk['chunk']['bytes'].decode('utf-8'))
+                    if 'content' in chunk_data:
+                        agent_response += chunk_data['content']
+        
+        # If not streaming or empty response
+        if not agent_response and 'completion' in response:
+            agent_response = response['completion']
+        
+        # Add agent response to conversation history
+        conversation_sessions[session_id].append({
+            "role": "assistant",
+            "content": agent_response
+        })
+        
+        # Trim conversation history if too long (to prevent token limits)
+        if len(conversation_sessions[session_id]) > 100:
+            conversation_sessions[session_id] = conversation_sessions[session_id][-100:]
+        
+        return jsonify({
+            "response": agent_response,
+            "completionReason": completion_reason,
+            "sessionId": session_id
+        })
+        
+    except Exception as e:
+        logger.error(f"Error processing message: {str(e)}")
+        return jsonify({
+            "error": str(e),
+            "response": "Sorry, there was an error processing your request."
+        }), 500
+
+# Reset chat endpoint
+@app.route('/api/reset-chat', methods=['POST'])
+def reset_chat():
+    try:
+        data = request.json
+        session_id = data.get('sessionId', 'default_session')
+        
+        # Clear conversation history for session
+        if session_id in conversation_sessions:
+            conversation_sessions[session_id] = []
+        
+        return jsonify({"status": "success", "message": "Chat history cleared"})
+    except Exception as e:
+        logger.error(f"Error resetting chat: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # API to handle business registration
 @app.route('/api/register-business', methods=['POST'])
@@ -126,59 +239,23 @@ def get_orders():
     orders = fetch_orders()
     return jsonify({"orders": orders})
 
-# API to interact with Amazon Nova Pro model
-@app.route('/api/nova-pro', methods=['POST'])
-def nova_pro():
-    input_text = request.json.get('input_text', '')
-    if not input_text:
-        return jsonify({"error": "Input text is required"}), 400
-
-    url = "https://your-amazon-nova-pro-endpoint"  # Replace with your actual endpoint
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
-    body = {
-        "modelId": "amazon.nova-pro-v1:0",
-        "contentType": "application/json",
-        "accept": "application/json",
-        "body": {
-            "inferenceConfig": {
-                "max_new_tokens": 1000
-            },
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "text": input_text
-                        }
-                    ]
-                }
-            ]
-        }
-    }
-
-    response = requests.post(url, headers=headers, json=body)
-    if response.status_code == 200:
-        return jsonify(response.json())
-    else:
-        return jsonify({"error": "Failed to get response from Amazon Nova Pro"}), response.status_code
-
 @app.route('/api/bedrock-agent', methods=['POST', 'OPTIONS'])
 def bedrock_agent():
     if request.method == 'OPTIONS':
         return '', 200  # Handle preflight request
+
     data = request.json
     prompt = data.get('prompt', '')
 
     if not prompt:
         return jsonify({"error": "Prompt is required"}), 400
 
-    # Simulate a response from the Bedrock agent for testing
-    response = {"completion": f"Echo: {prompt}"}
-
-    return jsonify({"response": response["completion"]})
+    # Query the Bedrock agent
+    response = query_agent(prompt)
+    if "error" in response:
+        return jsonify(response), 500  # Return the error response with a 500 status code
+    else:
+        return jsonify({"response": response})
 
 
 @app.route('/login', methods=['POST', 'OPTIONS'])
@@ -193,19 +270,6 @@ def login():
         return jsonify({"message": "Login successful!"})
     else:
         return jsonify({"error": "Invalid credentials"}), 401
-
-bedrock_agent_runtime = boto3.client('bedrock-agent-runtime')
-
-def query_agent(prompt):
-    response = bedrock_agent_runtime.invoke_agent(
-        agentId='your-agent-id',
-        agentAliasId='your-agent-alias-id',
-        sessionId='unique-session-id',  # Generate or reuse for conversation continuity
-        inputText=prompt
-    )
-    
-    return response['completion']
-
 
 
 if __name__ == '__main__':

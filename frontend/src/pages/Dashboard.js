@@ -166,7 +166,8 @@ const DashboardPage = () => {
         <nav>
           <ul>
             <li><a href="#dashboard">Dashboard</a></li>
-            <li><a href="#settings">Settings</a></li>
+            <li><a href="/settings">Settings</a></li>
+            <li><a href="/chatbot">Chatbot</a></li>
             <li><a href="/profile">Profile</a></li>
             <li><a href="#support">Support</a></li>
           </ul>
@@ -221,17 +222,9 @@ const DashboardPage = () => {
           <h1>Settings</h1>
           <p>Manage backups, notifications, and access control.</p>
         </section>
-
-        <section id="customer-dashboard" className="tab-content">
-          <h1>Customer Dashboard</h1>
-          <div>
-            <h2>Order History</h2>
-            <ul id="order-history"></ul>
-          </div>
-          <div>
-            <h2>Recommendations</h2>
-            <div id="recommendations" className="grid"></div>
-          </div>
+        <section id="support" className="tab-content">
+          <h1>Support</h1>
+          <p>Contact us for any issues or inquiries.</p>
         </section>
 
 

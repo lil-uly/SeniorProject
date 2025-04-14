@@ -1,6 +1,33 @@
-import boto3
-AWS_REGION = "us-east-1"
-BUSINESS_COGNITO_USER_POOL_ID = "us-east-1_LhWvaZUmp"
-COGNITO_APP_CLIENT_ID = "3uo9it101gch2ik7jlt8ou5ijb"
-CLIENT_SECRET = "9kpgl8dm8g1tkv5rmdu5fo8m15fr5ghoi6ldtvo5url8nm3dgm2"
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Validate required environment variables
+required_env_vars = [
+    "BEDROCK_AGENT_ID",
+    "BEDROCK_AGENT_ALIAS_ID",
+    "AWS_REGION",
+    "BUSINESS_COGNITO_USER_POOL_ID",
+    "COGNITO_APP_CLIENT_ID",
+    "CLIENT_SECRET"
+]
+
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+if missing_vars:
+    raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
+
+# AWS Bedrock Agent Configuration
+BEDROCK_AGENT_CONFIG = {
+    "agentId": os.getenv("BEDROCK_AGENT_ID"),  # AWS Bedrock agent ID
+    "agentAliasId": os.getenv("BEDROCK_AGENT_ALIAS_ID"),  # AWS Bedrock agent alias ID
+    "region": os.getenv("AWS_REGION"),  # AWS region
+}
+
+# AWS Cognito Configuration
+AWS_REGION = os.getenv("AWS_REGION")
+BUSINESS_COGNITO_USER_POOL_ID = os.getenv("BUSINESS_COGNITO_USER_POOL_ID")
+COGNITO_APP_CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 

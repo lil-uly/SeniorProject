@@ -1,59 +1,110 @@
-import React, { useState } from "react";
-import "./Chatbot.css";
+// chatbot.js
+import React, { useState, useEffect, useRef } from 'react';
+import './Chatbot.css'; // You'll need to create this CSS file
 
 const Chatbot = () => {
-  const [prompt, setPrompt] = useState(""); // User input
-  const [responses, setResponses] = useState([]); // Chat history
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const handleSubmit = async (e) => {
+  // Auto-scroll to bottom when new messages arrive
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Handle sending messages to the backend
+  const sendMessage = async (e) => {
     e.preventDefault();
+    if (!input.trim()) return;
 
-    if (!prompt.trim()) {
-      alert("Please enter a prompt!");
-      return;
-    }
+    // Add user message to chat
+    const userMessage = { text: input, sender: 'user' };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInput('');
+    setIsLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/bedrock-agent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+      // Send message to backend
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: input }),
       });
 
-      const data = await response.json();
-      if (data.response) {
-        setResponses((prev) => [...prev, { user: prompt, bot: data.response }]);
-      } else {
-        setResponses((prev) => [...prev, { user: prompt, bot: "Error: No response from the agent." }]);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    } catch (error) {
-      console.error("Error communicating with the Bedrock agent:", error);
-      setResponses((prev) => [...prev, { user: prompt, bot: "Error: Unable to connect to the server." }]);
-    }
 
-    setPrompt(""); // Clear the input field
+      const data = await response.json();
+      
+      // Add AI response to chat
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: data.response, sender: 'ai' },
+      ]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Add error message to chat
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: 'Sorry, there was an error processing your request.', sender: 'ai' },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="chatbot-container">
-      <h1>Chatbot</h1>
-      <div className="chat-history">
-        {responses.map((response, index) => (
-          <div key={index} className="chat-message">
-            <strong>User:</strong> {response.user}
-            <br />
-            <strong>Bot:</strong> {response.bot}
-          </div>
-        ))}
+      <div className="chatbot-header">
+        <h2>AI Assistant</h2>
       </div>
-      <form onSubmit={handleSubmit}>
+      
+      <div className="messages-container">
+        {messages.length === 0 ? (
+          <div className="empty-state">
+            <p>Ask me anything!</p>
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <div 
+              key={index} 
+              className={`message ${message.sender === 'user' ? 'user-message' : 'ai-message'}`}
+            >
+              {message.text}
+            </div>
+          ))
+        )}
+        {isLoading && (
+          <div className="message ai-message loading">
+            <div className="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      
+      <form className="input-form" onSubmit={sendMessage}>
         <input
           type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Type your message..."
+          disabled={isLoading}
         />
-        <button type="submit">Send</button>
+        <button type="submit" disabled={isLoading || !input.trim()}>
+          Send
+        </button>
       </form>
     </div>
   );
