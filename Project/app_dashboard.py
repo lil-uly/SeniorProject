@@ -8,7 +8,7 @@ from flask_cors import CORS
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:3000"])  # Allow requests from the frontend
 
 # API to handle business registration
 @app.route('/api/register-business', methods=['POST'])
@@ -164,6 +164,35 @@ def nova_pro():
         return jsonify(response.json())
     else:
         return jsonify({"error": "Failed to get response from Amazon Nova Pro"}), response.status_code
+
+@app.route('/api/bedrock-agent', methods=['POST', 'OPTIONS'])
+def bedrock_agent():
+    if request.method == 'OPTIONS':
+        return '', 200  # Handle preflight request
+    data = request.json
+    prompt = data.get('prompt', '')
+
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
+
+    # Simulate a response from the Bedrock agent for testing
+    response = {"completion": f"Echo: {prompt}"}
+
+    return jsonify({"response": response["completion"]})
+
+
+@app.route('/login', methods=['POST', 'OPTIONS'])
+def login():
+    if request.method == 'OPTIONS':
+        return '', 200  # Handle preflight request
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    if username == 'testuser' and password == 'password123':
+        return jsonify({"message": "Login successful!"})
+    else:
+        return jsonify({"error": "Invalid credentials"}), 401
 
 bedrock_agent_runtime = boto3.client('bedrock-agent-runtime')
 

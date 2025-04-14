@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "r
 import axios from "axios";
 import "./App.css";
 import DashboardPage from "./pages/Dashboard";
-// import BusinessRegistration from "./pages/BusinessRegistration";
+import Chatbot from "./pages/Chatbot"; // Import the Chatbot component
 
 const Auth = () => {
   const [form, setForm] = useState({
@@ -118,6 +118,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/chatbot" element={<Chatbot />} /> {/* Add Chatbot route */}
       </Routes>
     </Router>
   );

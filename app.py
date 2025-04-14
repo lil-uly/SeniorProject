@@ -31,6 +31,30 @@ oauth.register(
 client = boto3.client('cognito-idp', region_name=config.AWS_REGION)
 cognito = CognitoIdentityProviderWrapper(client, config.BUSINESS_COGNITO_USER_POOL_ID, config.COGNITO_APP_CLIENT_ID, config.CLIENT_SECRET)
 
+# AWS Bedrock Configuration
+bedrock_client = boto3.client(
+    'bedrock-runtime',
+    region_name='us-east-1',  # Replace with your AWS region
+    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),  # Use environment variables for credentials
+    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+)
+
+# Function to query the Bedrock agent
+def query_bedrock_agent(prompt):
+    session_id = session.get('session_id', str(uuid.uuid4()))  # Retrieve or generate session ID
+
+    try:
+        response = bedrock_client.invoke_agent(
+            agentId='YJ9JMZY1PW',  # Replace with your Bedrock agent ID
+            agentAliasId='7NEBCEGJS4',  # Replace with your Bedrock agent alias ID
+            sessionId=session_id,
+            inputText=prompt
+        )
+        return response['completion']
+    except Exception as e:
+        print(f"Error querying Bedrock agent: {e}")
+        return None
+
 # Sample data for dashboard
 business_metrics = {
     "sales": 12000,
@@ -193,19 +217,21 @@ def nova_pro():
     else:
         return jsonify({"error": "Failed to get response from Amazon Nova Pro"}), response.status_code
 
-bedrock_agent_runtime = boto3.client('bedrock-agent-runtime')
+# API endpoint to interact with the Bedrock agent
+@app.route('/api/bedrock-agent', methods=['POST'])
+def bedrock_agent():
+    data = request.json
+    prompt = data.get('prompt', '')
 
-def query_agent(prompt):
-    session_id = session.get('session_id', str(uuid.uuid4()))  # Retrieve session ID
+    if not prompt:
+        return jsonify({"error": "Prompt is required"}), 400
 
-    response = bedrock_agent_runtime.invoke_agent(
-        agentId='YJ9JMZY1PW',
-        agentAliasId='JEP8RH1V0S',
-        sessionId=session_id,  # Use session ID for continuity
-        inputText=prompt
-    )
-
-    return response['completion']
+    # Query the Bedrock agent
+    response = query_bedrock_agent(prompt)
+    if response:
+        return jsonify({"response": response})
+    else:
+        return jsonify({"error": "Failed to get a response from the Bedrock agent"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
