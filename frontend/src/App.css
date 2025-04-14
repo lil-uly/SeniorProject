@@ -22,7 +22,54 @@ body {
   box-sizing: border-box;
 }
 
+/* Signup Container */
+.signup-container {
+  width: 90%;
+  max-width: 500px;
+  overflow: visible;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+/* Login Container */
+.business-registration-container {
+  width: 90%;
+  max-width: 500px;
+  overflow: visible;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+/* Login Container */
+.confirmation-container {
+  width: 90%;
+  max-width: 500px;
+  overflow: visible;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
 .login-container:hover {
+  transform: translateY(-5px);
+}
+
+.signup-container:hover {
+  transform: translateY(-5px);
+}
+
+.business-registration-container:hover {
+  transform: translateY(-5px);
+}
+
+.confirmation-container:hover {
   transform: translateY(-5px);
 }
 
