@@ -134,3 +134,12 @@ h2 {
     padding: 15px;
   }
 }
+
+.input-caption {
+  font-size: 14px;
+  color: #666;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  display: block;
+  padding-left: 4px;
+}

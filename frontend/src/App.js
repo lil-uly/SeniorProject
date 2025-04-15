@@ -168,7 +168,7 @@ const Auth = () => {
             placeholder="Birthdate"
             onChange={handleChange}
           />
-
+          <small className="input-caption">Please enter your birthday.</small>
           <h2>Business Registration</h2>
           <input
             className="input-field"
@@ -184,7 +184,7 @@ const Auth = () => {
             required
             placeholder="Business Type"
           >
-            <option value="">Business Type</option>
+            <option value="" disabled selected hidden>Select a Business Type</option>
             <option value="retail">Retail</option>
             <option value="service">Service</option>
             <option value="manufacturing">Manufacturing</option>
@@ -218,6 +218,7 @@ const Auth = () => {
             placeholder="Phone Number"
             onChange={handleChange}
           />
+          <small className="input-caption">+1XXXXXXXXXX</small>
           <button className="login-button" onClick={handleSignup}>
             Register
           </button>
