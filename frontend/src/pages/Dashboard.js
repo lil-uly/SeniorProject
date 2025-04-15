@@ -1,17 +1,29 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Chart as ChartJS, LineController, LineElement, PointElement, BarController, BarElement, ArcElement, PieController, CategoryScale, LinearScale, Title, Tooltip, Legend } from "chart.js";
+import {
+  Chart as ChartJS,
+  LineController,
+  LineElement,
+  PointElement,
+  BarController,
+  BarElement,
+  ArcElement,
+  PieController,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend
+} from "chart.js";
 import "./DashboardPage.css";
 
-
-// Register all necessary components and controllers
 ChartJS.register(
   LineController,
   LineElement,
-  PointElement,  // Register the PointElement for line charts
-  BarController,  // Register the BarController for bar charts
+  PointElement,
+  BarController,
   BarElement,
   ArcElement,
-  PieController,  // Register the PieController for pie charts
+  PieController,
   CategoryScale,
   LinearScale,
   Title,
@@ -32,7 +44,6 @@ const DashboardPage = () => {
   const engagementChartInstance = useRef(null);
   const inventoryChartInstance = useRef(null);
 
-  // Fetch dashboard data from API
   useEffect(() => {
     fetch("http://127.0.0.1:5000/dashboard")
       .then(response => response.json())
@@ -44,71 +55,114 @@ const DashboardPage = () => {
       .catch(error => console.error("Error fetching dashboard data:", error));
   }, []);
 
-  // Initialize charts
   useEffect(() => {
     if (salesChartRef.current && engagementChartRef.current && inventoryChartRef.current) {
-      // Destroy old charts if they exist to avoid "Canvas is already in use" error
       if (salesChartInstance.current) salesChartInstance.current.destroy();
       if (engagementChartInstance.current) engagementChartInstance.current.destroy();
       if (inventoryChartInstance.current) inventoryChartInstance.current.destroy();
 
-      // Sales Chart Data
       salesChartInstance.current = new ChartJS(salesChartRef.current, {
         type: 'line',
         data: {
           labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          datasets: [
-            {
-              label: "Sales",
-              data: [100, 200, 150, 300],
-              borderColor: "blue",
-              borderWidth: 2,
-              pointBackgroundColor: 'red', // Optional: color for points on the line
-            },
-          ],
+          datasets: [{
+            label: "Sales",
+            data: [100, 200, 150, 300],
+            borderColor: "#82aaff",
+            backgroundColor: "rgba(130, 170, 255, 0.2)",
+            borderWidth: 2,
+            pointBackgroundColor: "#ffffff",
+            pointBorderColor: "#82aaff",
+            tension: 0.4,
+          }],
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#333",
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
+            y: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
+          },
         },
       });
 
-      // Engagement Chart Data (Bar chart)
       engagementChartInstance.current = new ChartJS(engagementChartRef.current, {
         type: 'bar',
         data: {
           labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          datasets: [
-            {
-              label: "Engagement",
-              data: [50, 60, 70, 80],
-              backgroundColor: "green",
-            },
-          ],
+          datasets: [{
+            label: "Engagement",
+            data: [50, 60, 70, 80],
+            backgroundColor: "rgba(102, 178, 255, 0.6)",
+            borderColor: "#66b2ff",
+            borderWidth: 1,
+          }],
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#333",
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
+            y: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
+          },
         },
       });
 
-      // Inventory Chart Data (Pie chart)
       inventoryChartInstance.current = new ChartJS(inventoryChartRef.current, {
         type: 'pie',
         data: {
           labels: Object.keys(inventoryLevels),
-          datasets: [
-            {
-              label: "Inventory",
-              data: Object.values(inventoryLevels),
-              backgroundColor: ["red", "yellow", "blue", "green"],
-            },
-          ],
+          datasets: [{
+            label: "Inventory",
+            data: Object.values(inventoryLevels),
+            backgroundColor: [
+              "#cce5ff",
+              "#b3d1ff",
+              "#99ccff",
+              "#80bfff",
+              "#66b2ff",
+            ],
+            borderColor: "#ffffff",
+            borderWidth: 2,
+          }],
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#333",
+              },
+            },
+          },
         },
       });
     }
-  }, [inventoryLevels]); // Re-run when inventoryLevels changes
+  }, [inventoryLevels]);
 
   return (
     <div>
@@ -164,15 +218,34 @@ const DashboardPage = () => {
       </main>
 
       <div>
-        <h2>Dashboard</h2>
-        <p>Sales: <span>{`$${sales}`}</span></p>
-        <p>Customer Engagement: <span>{`${customerEngagement}%`}</span></p>
+        <h1>Metrics</h1>
+        <div className="stat-section">
+          <div className="stat-block sales">
+            <h3>Sales</h3>
+            <p>${sales.toLocaleString()}</p>
+          </div>
+          <div className="stat-block engagement">
+            <h3>Customer Engagement</h3>
+            <p>{customerEngagement}%</p>
+          </div>
+        </div>
         <h3>Inventory Levels:</h3>
-        <ul>
-          {Object.keys(inventoryLevels).map((item, index) => (
-            <li key={index}>{item}: {inventoryLevels[item]}</li>
-          ))}
-        </ul>
+        {Object.keys(inventoryLevels).map((item, index) => {
+          const value = inventoryLevels[item];
+          const percent = Math.min((value / 100) * 100, 100); // Assuming 100 is max inventory for visual purposes
+
+          return (
+            <div key={index} style={{ marginBottom: '1rem' }}>
+              <div className="metric-label">{item}: {value}</div>
+              <div className="metric-bar">
+                <div
+                  className="metric-bar-fill"
+                  style={{ width: `${percent}%` }}
+                ></div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <footer>
@@ -183,6 +256,7 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+
 
 
 
