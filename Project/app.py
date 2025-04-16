@@ -125,8 +125,15 @@ def login():
 
         # Generate and store session ID
         session['session_id'] = str(uuid.uuid4())
+        id_token = response['AuthenticationResult']['IdToken']
+        access_token = response['AuthenticationResult']['AccessToken']
 
-        return jsonify({"message": "User logged in successfully!", "session_id": session['session_id'], "response": response})
+        return jsonify({
+            "message": "User logged in successfully!", 
+            "session_id": session['session_id'],
+            "id_token": id_token,
+            "access_token": access_token,
+            "response": response})
 
     except client.exceptions.NotAuthorizedException:
         return jsonify({"error": "Incorrect username or password"}), 400
