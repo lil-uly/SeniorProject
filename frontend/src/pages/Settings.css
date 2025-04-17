@@ -1,113 +1,115 @@
-/* Enhanced Settings.css */
+/* Consistent Desktop-Only Design for Settings */
 
-.settings-container {
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .settings-container {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.05);
+  }
+  
+  .settings-header {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 40px;
+    border-bottom: 3px solid #3b82f6;
+    display: inline-block;
+    padding-bottom: 10px;
+  }
+  
+  .settings-form {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 30px;
-    background-color: #eef2f7;
-    min-height: 100vh;
-    font-family: 'Roboto', sans-serif;
-}
-
-.settings-header {
-    font-size: 2.8rem;
-    font-weight: 700;
-    margin-bottom: 25px;
-    color: #2c3e50;
-    text-align: center;
-}
-
-.settings-form {
-    width: 100%;
-    max-width: 650px;
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.settings-form:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-}
-
-.settings-form label {
-    display: block;
-    font-size: 1.1rem;
-    margin-bottom: 8px;
-    color: #34495e;
+    gap: 24px;
+  }
+  
+  .settings-form label {
     font-weight: 600;
-}
-
-.settings-form input,
-.settings-form select {
-    width: 100%;
+    color: #374151;
+    margin-bottom: 6px;
+    display: block;
+    font-size: 1rem;
+  }
+  
+  .settings-form input,
+  .settings-form select {
     padding: 14px;
-    margin-bottom: 20px;
-    border: 1px solid #dcdde1;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 1rem;
-    background-color: #f9f9f9;
-    transition: border-color 0.3s ease, background-color 0.3s ease;
-}
-
-.settings-form input:focus,
-.settings-form select:focus {
-    border-color: #3498db;
-    outline: none;
-    background-color: #ffffff;
-}
-
-.settings-form h2 {
-    font-size: 1.8rem;
-    margin-top: 25px;
-    margin-bottom: 15px;
-    color: #2c3e50;
-    border-bottom: 3px solid #3498db;
-    padding-bottom: 8px;
-}
-
-.settings-form button {
+    background-color: #f9fafb;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
     width: 100%;
-    padding: 14px;
-    background-color: #3498db;
-    color: #ffffff;
-    font-size: 1.2rem;
-    font-weight: 700;
+  }
+  
+  .settings-form input:focus,
+  .settings-form select:focus {
+    border-color: #3b82f6;
+    background-color: #ffffff;
+    outline: none;
+  }
+  
+  .settings-form h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 40px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #3b82f6;
+    padding-bottom: 6px;
+  }
+  
+  .settings-form .section-divider {
+    border-top: 1px solid #e5e7eb;
+    margin: 30px 0;
+  }
+  
+  .settings-form button {
+    padding: 14px 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    background-color: #1d4ed8;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.settings-form button:hover {
-    background-color: #2980b9;
-    transform: scale(1.03);
-}
-
-.settings-form button:active {
-    transform: scale(0.97);
-}
-
-.settings-form .error-message {
-    color: #e74c3c;
+    transition: background 0.2s ease, transform 0.2s ease;
+    width: 100%;
+  }
+  
+  .settings-form button:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+  }
+  
+  .settings-form button:active {
+    background-color: #1e40af;
+    transform: scale(0.98);
+  }
+  
+  .settings-form .error-message {
+    color: #ef4444;
     font-size: 0.95rem;
     margin-top: -10px;
     margin-bottom: 15px;
     text-align: left;
-}
-
-.settings-form .success-message {
-    color: #27ae60;
+  }
+  
+  .settings-form .success-message {
+    color: #10b981;
     font-size: 0.95rem;
     margin-top: -10px;
     margin-bottom: 15px;
     text-align: left;
-}
-
-.settings-form .section-divider {
-    margin: 20px 0;
-    border-top: 1px solid #dcdde1;
-}
+  }
+  

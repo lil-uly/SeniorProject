@@ -251,6 +251,8 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Auth />} />
+        <Route path="/chat" element={<CCChatBox />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route
           path="/profile"
