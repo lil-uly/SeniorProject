@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
+import jsPDF from "jspdf";
 import "./DashboardPage.css";
 
 ChartJS.register(
@@ -33,6 +34,10 @@ const DashboardPage = () => {
   const compareChartRef = useRef(null);
   const salesChartInstance = useRef(null);
   const compareChartInstance = useRef(null);
+  const productChartRef = useRef(null);
+  const productChartInstance = useRef(null);
+  const demographicsChartRef = useRef(null);
+  const demographicsChartInstance = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("idToken");
@@ -113,6 +118,75 @@ const DashboardPage = () => {
         },
       },
     });
+    // --- Calculate Best/Worst Month and Forecast ---
+    const maxValue = Math.max(...revenueData);
+    const minValue = Math.min(...revenueData);
+    const maxMonth = monthLabels[revenueData.indexOf(maxValue)];
+    const minMonth = monthLabels[revenueData.indexOf(minValue)];
+    const avgGrowth = ((revenueData[11] - revenueData[0]) / 11).toFixed(2);
+    const forecast = revenueData[11] + parseFloat(avgGrowth);
+
+    setInsights(prev => ({
+      ...prev,
+      bestMonth: { month: maxMonth, value: maxValue },
+      worstMonth: { month: minMonth, value: minValue },
+      forecast: forecast.toFixed(2),
+    }));
+
+    // --- Product Breakdown Chart (using sample data) ---
+    if (productChartInstance.current) productChartInstance.current.destroy();
+
+    const productLabels = ["Product A", "Product B", "Product C"];
+    const productData = [32000, 24000, 18000];
+
+    productChartInstance.current = new ChartJS(productChartRef.current, {
+      type: "pie",
+      data: {
+        labels: productLabels,
+        datasets: [{
+          label: "Product Breakdown",
+          data: productData,
+          backgroundColor: ["#4dc9f6", "#f67019", "#f53794"],
+        }],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "bottom" },
+        },
+      },
+    });
+    // --- Customer Demographics Chart ---
+    if (demographicsChartInstance.current) demographicsChartInstance.current.destroy();
+
+    const demographicLabels = ["18-24", "25-34", "35-44", "45-54", "55+"];
+    const demographicData = [25, 35, 20, 12, 8]; // percentage
+
+    demographicsChartInstance.current = new ChartJS(demographicsChartRef.current, {
+      type: "pie",
+      data: {
+        labels: demographicLabels,
+        datasets: [{
+          label: "Customer Demographics",
+          data: demographicData,
+          backgroundColor: ["#ffd54f", "#4fc3f7", "#81c784", "#ba68c8", "#e57373"],
+        }],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: "Customer Demographics (by Age Group)",
+          },
+          legend: {
+            position: "bottom",
+          },
+        },
+      },
+    });
+
+
   }, [salesData, selectedYear, businessName]);
 
   useEffect(() => {
@@ -179,6 +253,27 @@ const DashboardPage = () => {
   }, [compareYears, salesData]);
 
   const availableYears = [...new Set(salesData.map((item) => item.year))];
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("Revenue Insights Report", 20, 20);
+
+    if (insights.year1 && insights.year2) {
+      doc.text(`Business: ${businessName}`, 20, 30);
+      doc.text(`Compared Years: ${insights.year1} vs ${insights.year2}`, 20, 40);
+      doc.text(`Total Revenue in ${insights.year1}: $${insights.total1.toLocaleString()}`, 20, 50);
+      doc.text(`Total Revenue in ${insights.year2}: $${insights.total2.toLocaleString()}`, 20, 60);
+      doc.text(`Change: $${insights.diff.toLocaleString()} (${insights.percentChange}%)`, 20, 70);
+
+      const suggestion = insights.diff > 0
+        ? "Revenue increased! Consider reinvesting in growth strategies."
+        : "Revenue declined. Consider investigating low-performing months or campaigns.";
+      doc.text(`Insight: ${suggestion}`, 20, 80);
+    }
+
+    doc.save("revenue-insights.pdf");
+  };
 
   return (
     <div>
@@ -255,8 +350,30 @@ const DashboardPage = () => {
                       ? "📈 Revenue increased! Consider reinvesting in growth strategies."
                       : "📉 Revenue declined. Consider investigating low-performing months or campaigns."}
                   </p>
+                  <button onClick={exportToPDF} style={{ marginTop: "1rem" }}>📄 Export Insights to PDF</button>
                 </div>
               )}
+              <div className="card">
+                <h2>Top Product Revenue</h2>
+                <canvas ref={productChartRef}></canvas>
+                <p style={{ marginTop: "1rem" }}>🏆 Top Product: Product A ($32,000)</p>
+              </div>
+
+              <div className="card" style={{ marginTop: "2rem" }}>
+                <h3>Additional Insights</h3>
+                {insights.bestMonth && insights.worstMonth && (
+                  <div>
+                    <p>📈 Best Month: {insights.bestMonth.month} (${insights.bestMonth.value.toLocaleString()})</p>
+                    <p>📉 Worst Month: {insights.worstMonth.month} (${insights.worstMonth.value.toLocaleString()})</p>
+                    <p>🔮 Forecasted Revenue (Next Month): ${insights.forecast}</p>
+                  </div>
+                )}
+              </div>
+              <div className="card">
+                <h2>Customer Demographics</h2>
+                <canvas ref={demographicsChartRef}></canvas>
+                <p style={{ marginTop: "1rem" }}>👥 Largest Segment: 25–34 years old (35%)</p>
+              </div>
             </div>
           </div>
         </section>
@@ -270,3 +387,4 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+
