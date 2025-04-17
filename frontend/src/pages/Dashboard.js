@@ -2,8 +2,10 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   Chart as ChartJS,
   LineController,
+  PieController,
   LineElement,
   PointElement,
+  ArcElement,
   CategoryScale,
   LinearScale,
   Title,
@@ -19,6 +21,8 @@ ChartJS.register(
   PointElement,
   CategoryScale,
   LinearScale,
+  PieController,
+  ArcElement,
   Title,
   Tooltip,
   Legend
@@ -210,14 +214,15 @@ const DashboardPage = () => {
     const diff = total2 - total1;
     const percentChange = ((diff / total1) * 100).toFixed(2);
 
-    setInsights({
+    setInsights(prev => ({
+      ...prev,
       year1: compareYears.year1,
       year2: compareYears.year2,
       total1,
       total2,
       diff,
       percentChange,
-    });
+    }));
 
     compareChartInstance.current = new ChartJS(compareChartRef.current, {
       type: "line",
