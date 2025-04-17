@@ -4,10 +4,6 @@ import {
   LineController,
   LineElement,
   PointElement,
-  BarController,
-  BarElement,
-  ArcElement,
-  PieController,
   CategoryScale,
   LinearScale,
   Title,
@@ -20,10 +16,6 @@ ChartJS.register(
   LineController,
   LineElement,
   PointElement,
-  BarController,
-  BarElement,
-  ArcElement,
-  PieController,
   CategoryScale,
   LinearScale,
   Title,
@@ -32,137 +24,161 @@ ChartJS.register(
 );
 
 const DashboardPage = () => {
-  const [sales, setSales] = useState(0);
-  const [customerEngagement, setCustomerEngagement] = useState(0);
-  const [inventoryLevels, setInventoryLevels] = useState({});
-  const [recommendations] = useState(["Product A", "Product B", "Product C", "Product D"]);
-
+  const [salesData, setSalesData] = useState([]);
+  const [businessName, setBusinessName] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [compareYears, setCompareYears] = useState({ year1: "", year2: "" });
+  const [insights, setInsights] = useState({});
   const salesChartRef = useRef(null);
-  const engagementChartRef = useRef(null);
-  const inventoryChartRef = useRef(null);
+  const compareChartRef = useRef(null);
   const salesChartInstance = useRef(null);
-  const engagementChartInstance = useRef(null);
-  const inventoryChartInstance = useRef(null);
+  const compareChartInstance = useRef(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/dashboard")
-      .then(response => response.json())
-      .then(data => {
-        setSales(data.sales);
-        setCustomerEngagement(data.customer_engagement);
-        setInventoryLevels(data.inventory_levels);
+    const token = localStorage.getItem("idToken");
+    if (!token) return;
+
+    const decoded = JSON.parse(atob(token.split(".")[1]));
+    const name = decoded["custom:businessName"];
+    setBusinessName(name);
+
+    fetch("https://cnj7gaspn5.execute-api.us-east-1.amazonaws.com/get-business-data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ business_name: name }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const items = data.items || [];
+        setSalesData(items);
+        if (items.length > 0) setSelectedYear(items[0].year);
       })
-      .catch(error => console.error("Error fetching dashboard data:", error));
+      .catch((err) => console.error("Failed to fetch business data:", err));
   }, []);
 
   useEffect(() => {
-    if (salesChartRef.current && engagementChartRef.current && inventoryChartRef.current) {
-      if (salesChartInstance.current) salesChartInstance.current.destroy();
-      if (engagementChartInstance.current) engagementChartInstance.current.destroy();
-      if (inventoryChartInstance.current) inventoryChartInstance.current.destroy();
+    if (!salesData.length || !salesChartRef.current || !selectedYear) return;
 
-      salesChartInstance.current = new ChartJS(salesChartRef.current, {
-        type: 'line',
-        data: {
-          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          datasets: [{
-            label: "Sales",
-            data: [100, 200, 150, 300],
+    if (salesChartInstance.current) salesChartInstance.current.destroy();
+
+    const filtered = salesData.find((row) => row.year === selectedYear);
+    if (!filtered) return;
+
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const revenueData = months.map((m) => parseFloat(filtered[m] || 0));
+
+    salesChartInstance.current = new ChartJS(salesChartRef.current, {
+      type: "line",
+      data: {
+        labels: monthLabels,
+        datasets: [
+          {
+            label: `Monthly Revenue (${selectedYear})`,
+            data: revenueData,
             borderColor: "#82aaff",
             backgroundColor: "rgba(130, 170, 255, 0.2)",
             borderWidth: 2,
             pointBackgroundColor: "#ffffff",
             pointBorderColor: "#82aaff",
             tension: 0.4,
-          }],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              labels: {
-                color: "#333",
-              },
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: "#333",
             },
           },
-          scales: {
-            x: {
-              ticks: { color: "#666" },
-              grid: { color: "rgba(130, 170, 255, 0.1)" },
-            },
-            y: {
-              ticks: { color: "#666" },
-              grid: { color: "rgba(130, 170, 255, 0.1)" },
-            },
+          title: {
+            display: true,
+            text: `Monthly Revenue for ${businessName}`,
           },
         },
-      });
+        scales: {
+          x: {
+            ticks: { color: "#666" },
+            grid: { color: "rgba(130, 170, 255, 0.1)" },
+          },
+          y: {
+            ticks: { color: "#666" },
+            grid: { color: "rgba(130, 170, 255, 0.1)" },
+          },
+        },
+      },
+    });
+  }, [salesData, selectedYear, businessName]);
 
-      engagementChartInstance.current = new ChartJS(engagementChartRef.current, {
-        type: 'bar',
-        data: {
-          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-          datasets: [{
-            label: "Engagement",
-            data: [50, 60, 70, 80],
-            backgroundColor: "rgba(102, 178, 255, 0.6)",
+  useEffect(() => {
+    if (!compareYears.year1 || !compareYears.year2 || !compareChartRef.current) return;
+
+    if (compareChartInstance.current) compareChartInstance.current.destroy();
+
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const year1Data = salesData.find(row => row.year === compareYears.year1);
+    const year2Data = salesData.find(row => row.year === compareYears.year2);
+
+    if (!year1Data || !year2Data) return;
+
+    const dataset1 = months.map(m => parseFloat(year1Data[m] || 0));
+    const dataset2 = months.map(m => parseFloat(year2Data[m] || 0));
+
+    const total1 = dataset1.reduce((a, b) => a + b, 0);
+    const total2 = dataset2.reduce((a, b) => a + b, 0);
+    const diff = total2 - total1;
+    const percentChange = ((diff / total1) * 100).toFixed(2);
+
+    setInsights({
+      year1: compareYears.year1,
+      year2: compareYears.year2,
+      total1,
+      total2,
+      diff,
+      percentChange,
+    });
+
+    compareChartInstance.current = new ChartJS(compareChartRef.current, {
+      type: "line",
+      data: {
+        labels: monthLabels,
+        datasets: [
+          {
+            label: `${compareYears.year1} Revenue`,
+            data: dataset1,
             borderColor: "#66b2ff",
-            borderWidth: 1,
-          }],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              labels: {
-                color: "#333",
-              },
-            },
+            backgroundColor: "rgba(102, 178, 255, 0.2)",
+            tension: 0.3,
           },
-          scales: {
-            x: {
-              ticks: { color: "#666" },
-              grid: { color: "rgba(130, 170, 255, 0.1)" },
-            },
-            y: {
-              ticks: { color: "#666" },
-              grid: { color: "rgba(130, 170, 255, 0.1)" },
-            },
+          {
+            label: `${compareYears.year2} Revenue`,
+            data: dataset2,
+            borderColor: "#ff9933",
+            backgroundColor: "rgba(255, 153, 51, 0.2)",
+            tension: 0.3,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: `Revenue Comparison: ${compareYears.year1} vs ${compareYears.year2}`,
           },
         },
-      });
+      },
+    });
+  }, [compareYears, salesData]);
 
-      inventoryChartInstance.current = new ChartJS(inventoryChartRef.current, {
-        type: 'pie',
-        data: {
-          labels: Object.keys(inventoryLevels),
-          datasets: [{
-            label: "Inventory",
-            data: Object.values(inventoryLevels),
-            backgroundColor: [
-              "#cce5ff",
-              "#b3d1ff",
-              "#99ccff",
-              "#80bfff",
-              "#66b2ff",
-            ],
-            borderColor: "#ffffff",
-            borderWidth: 2,
-          }],
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              labels: {
-                color: "#333",
-              },
-            },
-          },
-        },
-      });
-    }
-  }, [inventoryLevels]);
+  const availableYears = [...new Set(salesData.map((item) => item.year))];
 
   return (
     <div>
@@ -183,70 +199,68 @@ const DashboardPage = () => {
       <main>
         <section id="dashboard" className="tab-content active">
           <h1>Performance Dashboard</h1>
+
           <div className="dashboard-cards">
             <div className="card">
-              <h2>Sales</h2>
+              <h2>Monthly Revenue</h2>
+              <div style={{ marginBottom: "1rem" }}>
+                <label htmlFor="year-select">Select Year: </label>
+                <select
+                  id="year-select"
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                >
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
               <canvas ref={salesChartRef}></canvas>
             </div>
-            <div className="card">
-              <h2>Customer Engagement</h2>
-              <canvas ref={engagementChartRef}></canvas>
-            </div>
-            <div className="card">
-              <h2>Inventory</h2>
-              <canvas ref={inventoryChartRef}></canvas>
-            </div>
-          </div>
-        </section>
 
-        <section id="settings" className="tab-content">
-          <h1>Settings</h1>
-          <p>Manage backups, notifications, and access control.</p>
-        </section>
+            <div className="card" style={{ marginTop: "3rem" }}>
+              <h2>Compare Revenue Across Years</h2>
+              <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+                <select
+                  value={compareYears.year1}
+                  onChange={(e) => setCompareYears((prev) => ({ ...prev, year1: e.target.value }))}
+                >
+                  <option value="">Select Year 1</option>
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
 
-        <section id="customer-dashboard" className="tab-content">
-          <h1>Customer Dashboard</h1>
-          <div>
-            <h2>Order History</h2>
-            <ul id="order-history"></ul>
-          </div>
-          <div>
-            <h2>Recommendations</h2>
-            <div id="recommendations" className="grid"></div>
+                <select
+                  value={compareYears.year2}
+                  onChange={(e) => setCompareYears((prev) => ({ ...prev, year2: e.target.value }))}
+                >
+                  <option value="">Select Year 2</option>
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              <canvas ref={compareChartRef}></canvas>
+
+              {insights.year1 && insights.year2 && (
+                <div style={{ marginTop: "1rem" }}>
+                  <h4>Insights:</h4>
+                  <p>Total Revenue in {insights.year1}: ${insights.total1.toLocaleString()}</p>
+                  <p>Total Revenue in {insights.year2}: ${insights.total2.toLocaleString()}</p>
+                  <p>Change: ${insights.diff.toLocaleString()} ({insights.percentChange}%)</p>
+                  <p>
+                    {insights.diff > 0
+                      ? "📈 Revenue increased! Consider reinvesting in growth strategies."
+                      : "📉 Revenue declined. Consider investigating low-performing months or campaigns."}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </main>
-
-      <div>
-        <h1>Metrics</h1>
-        <div className="stat-section">
-          <div className="stat-block sales">
-            <h3>Sales</h3>
-            <p>${sales.toLocaleString()}</p>
-          </div>
-          <div className="stat-block engagement">
-            <h3>Customer Engagement</h3>
-            <p>{customerEngagement}%</p>
-          </div>
-        </div>
-        <h3>Inventory Levels:</h3>
-        {Object.keys(inventoryLevels).map((item, index) => {
-          const value = inventoryLevels[item];
-          const percent = Math.min((value / 100) * 100, 100); // Assuming 100 is max inventory for visual purposes
-
-          return (
-            <div key={index} style={{ marginBottom: '1rem' }}>
-              <div className="metric-label">{item}: {value}</div>
-              <div className="metric-bar">
-                <div
-                  className="metric-bar-fill"
-                  style={{ width: `${percent}%` }}
-                ></div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
       <footer>
         <p>&copy; 2025 Business Web App</p>
@@ -256,7 +270,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-
-
-
-
