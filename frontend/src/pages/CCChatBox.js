@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import './CCChatBox.css';
+
 
 const CCChatBox = () => {
   const [chatMessages, setChatMessages] = useState([]);

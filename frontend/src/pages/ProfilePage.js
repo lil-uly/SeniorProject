@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import './ProfilePage.css';
 
 
-const ProfilePage = ({ username = "testuser" }) => {
+const ProfilePage = ({ username = "CeCe" }) => {
   const [file, setFile] = useState(null);
   const [filename, setFilename] = useState("");
   const [dataType, setDataType] = useState("");
@@ -64,7 +64,7 @@ const ProfilePage = ({ username = "testuser" }) => {
           alt="Profile Avatar"
           className="robot-avatar"
         />
-        <h1 className="profile-name">Welcome, <span>{username}</span></h1>
+        <h1 className="profile-name">Welcome, CeCe <span>{username}</span></h1>
         <div className="nav-buttons">
         <button className="nav-btn" onClick={() => navigate("/dashboard")}>📊 Dashboard</button>
           <button className="nav-btn" onClick={() => navigate("/ccchatbox")}>🤖 CC: Your AI Business Companion</button>
