@@ -2,283 +2,187 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   Chart as ChartJS,
   LineController,
-  PieController,
   LineElement,
   PointElement,
+  BarController,
+  BarElement,
   ArcElement,
+  PieController,
   CategoryScale,
   LinearScale,
   Title,
   Tooltip,
   Legend
 } from "chart.js";
-import jsPDF from "jspdf";
 import "./DashboardPage.css";
 
 ChartJS.register(
   LineController,
   LineElement,
   PointElement,
+  BarController,
+  BarElement,
+  ArcElement,
+  PieController,
   CategoryScale,
   LinearScale,
-  PieController,
-  ArcElement,
   Title,
   Tooltip,
   Legend
 );
 
 const DashboardPage = () => {
-  const [salesData, setSalesData] = useState([]);
-  const [businessName, setBusinessName] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [compareYears, setCompareYears] = useState({ year1: "", year2: "" });
-  const [insights, setInsights] = useState({});
+  const [sales, setSales] = useState(0);
+  const [customerEngagement, setCustomerEngagement] = useState(0);
+  const [inventoryLevels, setInventoryLevels] = useState({});
+  const [recommendations] = useState(["Product A", "Product B", "Product C", "Product D"]);
+
   const salesChartRef = useRef(null);
-  const compareChartRef = useRef(null);
+  const engagementChartRef = useRef(null);
+  const inventoryChartRef = useRef(null);
   const salesChartInstance = useRef(null);
-  const compareChartInstance = useRef(null);
-  const productChartRef = useRef(null);
-  const productChartInstance = useRef(null);
-  const demographicsChartRef = useRef(null);
-  const demographicsChartInstance = useRef(null);
+  const engagementChartInstance = useRef(null);
+  const inventoryChartInstance = useRef(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("idToken");
-    if (!token) return;
-
-    const decoded = JSON.parse(atob(token.split(".")[1]));
-    const name = decoded["custom:businessName"];
-    setBusinessName(name);
-
-    fetch("https://cnj7gaspn5.execute-api.us-east-1.amazonaws.com/get-business-data", {
-      method: "POST",
+    fetch("http://127.0.0.1:5001/dashboard", {
+      credentials: 'include',  // Enable sending cookies with request
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ business_name: name }),
+        'Content-Type': 'application/json'
+      }
     })
-      .then((res) => res.json())
-      .then((data) => {
-        const items = data.items || [];
-        setSalesData(items);
-        if (items.length > 0) setSelectedYear(items[0].year);
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Unauthorized. Please log in.");
+          }
+          throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
+        }
+        return response.json();
       })
-      .catch((err) => console.error("Failed to fetch business data:", err));
+      .then(data => {
+        // Only update state if we have valid data
+        setSales(data?.metrics?.sales ?? 0);
+        setCustomerEngagement(data?.metrics?.customer_engagement ?? 0);
+        setInventoryLevels(data?.metrics?.inventory_levels ?? {});
+      })
+      .catch(error => {
+        console.error("Dashboard fetch error:", error);
+        // Set default values on error
+        setSales(0);
+        setCustomerEngagement(0);
+        setInventoryLevels({});
+      });
   }, []);
 
   useEffect(() => {
-    if (!salesData.length || !salesChartRef.current || !selectedYear) return;
+    if (salesChartRef.current && engagementChartRef.current && inventoryChartRef.current) {
+      if (salesChartInstance.current) salesChartInstance.current.destroy();
+      if (engagementChartInstance.current) engagementChartInstance.current.destroy();
+      if (inventoryChartInstance.current) inventoryChartInstance.current.destroy();
 
-    if (salesChartInstance.current) salesChartInstance.current.destroy();
-
-    const filtered = salesData.find((row) => row.year === selectedYear);
-    if (!filtered) return;
-
-    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const revenueData = months.map((m) => parseFloat(filtered[m] || 0));
-
-    salesChartInstance.current = new ChartJS(salesChartRef.current, {
-      type: "line",
-      data: {
-        labels: monthLabels,
-        datasets: [
-          {
-            label: `Monthly Revenue (${selectedYear})`,
-            data: revenueData,
+      salesChartInstance.current = new ChartJS(salesChartRef.current, {
+        type: 'line',
+        data: {
+          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          datasets: [{
+            label: "Sales",
+            data: [100, 200, 150, 300],
             borderColor: "#82aaff",
             backgroundColor: "rgba(130, 170, 255, 0.2)",
             borderWidth: 2,
             pointBackgroundColor: "#ffffff",
             pointBorderColor: "#82aaff",
             tension: 0.4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            labels: {
-              color: "#333",
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#333",
+              },
             },
           },
-          title: {
-            display: true,
-            text: `Monthly Revenue for ${businessName}`,
+          scales: {
+            x: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
+            y: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
           },
         },
-        scales: {
-          x: {
-            ticks: { color: "#666" },
-            grid: { color: "rgba(130, 170, 255, 0.1)" },
-          },
-          y: {
-            ticks: { color: "#666" },
-            grid: { color: "rgba(130, 170, 255, 0.1)" },
-          },
-        },
-      },
-    });
-    // --- Calculate Best/Worst Month and Forecast ---
-    const maxValue = Math.max(...revenueData);
-    const minValue = Math.min(...revenueData);
-    const maxMonth = monthLabels[revenueData.indexOf(maxValue)];
-    const minMonth = monthLabels[revenueData.indexOf(minValue)];
-    const avgGrowth = ((revenueData[11] - revenueData[0]) / 11).toFixed(2);
-    const forecast = revenueData[11] + parseFloat(avgGrowth);
+      });
 
-    setInsights(prev => ({
-      ...prev,
-      bestMonth: { month: maxMonth, value: maxValue },
-      worstMonth: { month: minMonth, value: minValue },
-      forecast: forecast.toFixed(2),
-    }));
-
-    // --- Product Breakdown Chart (using sample data) ---
-    if (productChartInstance.current) productChartInstance.current.destroy();
-
-    const productLabels = ["Product A", "Product B", "Product C"];
-    const productData = [32000, 24000, 18000];
-
-    productChartInstance.current = new ChartJS(productChartRef.current, {
-      type: "pie",
-      data: {
-        labels: productLabels,
-        datasets: [{
-          label: "Product Breakdown",
-          data: productData,
-          backgroundColor: ["#4dc9f6", "#f67019", "#f53794"],
-        }],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: "bottom" },
-        },
-      },
-    });
-    // --- Customer Demographics Chart ---
-    if (demographicsChartInstance.current) demographicsChartInstance.current.destroy();
-
-    const demographicLabels = ["18-24", "25-34", "35-44", "45-54", "55+"];
-    const demographicData = [25, 35, 20, 12, 8]; // percentage
-
-    demographicsChartInstance.current = new ChartJS(demographicsChartRef.current, {
-      type: "pie",
-      data: {
-        labels: demographicLabels,
-        datasets: [{
-          label: "Customer Demographics",
-          data: demographicData,
-          backgroundColor: ["#ffd54f", "#4fc3f7", "#81c784", "#ba68c8", "#e57373"],
-        }],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: "Customer Demographics (by Age Group)",
-          },
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-    });
-
-
-  }, [salesData, selectedYear, businessName]);
-
-  useEffect(() => {
-    if (!compareYears.year1 || !compareYears.year2 || !compareChartRef.current) return;
-
-    if (compareChartInstance.current) compareChartInstance.current.destroy();
-
-    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-    const year1Data = salesData.find(row => row.year === compareYears.year1);
-    const year2Data = salesData.find(row => row.year === compareYears.year2);
-
-    if (!year1Data || !year2Data) return;
-
-    const dataset1 = months.map(m => parseFloat(year1Data[m] || 0));
-    const dataset2 = months.map(m => parseFloat(year2Data[m] || 0));
-
-    const total1 = dataset1.reduce((a, b) => a + b, 0);
-    const total2 = dataset2.reduce((a, b) => a + b, 0);
-    const diff = total2 - total1;
-    const percentChange = ((diff / total1) * 100).toFixed(2);
-
-    setInsights(prev => ({
-      ...prev,
-      year1: compareYears.year1,
-      year2: compareYears.year2,
-      total1,
-      total2,
-      diff,
-      percentChange,
-    }));
-
-    compareChartInstance.current = new ChartJS(compareChartRef.current, {
-      type: "line",
-      data: {
-        labels: monthLabels,
-        datasets: [
-          {
-            label: `${compareYears.year1} Revenue`,
-            data: dataset1,
+      engagementChartInstance.current = new ChartJS(engagementChartRef.current, {
+        type: 'bar',
+        data: {
+          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          datasets: [{
+            label: "Engagement",
+            data: [50, 60, 70, 80],
+            backgroundColor: "rgba(102, 178, 255, 0.6)",
             borderColor: "#66b2ff",
-            backgroundColor: "rgba(102, 178, 255, 0.2)",
-            tension: 0.3,
+            borderWidth: 1,
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#333",
+              },
+            },
           },
-          {
-            label: `${compareYears.year2} Revenue`,
-            data: dataset2,
-            borderColor: "#ff9933",
-            backgroundColor: "rgba(255, 153, 51, 0.2)",
-            tension: 0.3,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: `Revenue Comparison: ${compareYears.year1} vs ${compareYears.year2}`,
+          scales: {
+            x: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
+            y: {
+              ticks: { color: "#666" },
+              grid: { color: "rgba(130, 170, 255, 0.1)" },
+            },
           },
         },
-      },
-    });
-  }, [compareYears, salesData]);
+      });
 
-  const availableYears = [...new Set(salesData.map((item) => item.year))];
-
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text("Revenue Insights Report", 20, 20);
-
-    if (insights.year1 && insights.year2) {
-      doc.text(`Business: ${businessName}`, 20, 30);
-      doc.text(`Compared Years: ${insights.year1} vs ${insights.year2}`, 20, 40);
-      doc.text(`Total Revenue in ${insights.year1}: $${insights.total1.toLocaleString()}`, 20, 50);
-      doc.text(`Total Revenue in ${insights.year2}: $${insights.total2.toLocaleString()}`, 20, 60);
-      doc.text(`Change: $${insights.diff.toLocaleString()} (${insights.percentChange}%)`, 20, 70);
-
-      const suggestion = insights.diff > 0
-        ? "Revenue increased! Consider reinvesting in growth strategies."
-        : "Revenue declined. Consider investigating low-performing months or campaigns.";
-      doc.text(`Insight: ${suggestion}`, 20, 80);
+      inventoryChartInstance.current = new ChartJS(inventoryChartRef.current, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(inventoryLevels),
+          datasets: [{
+            label: "Inventory",
+            data: Object.values(inventoryLevels),
+            backgroundColor: [
+              "#cce5ff",
+              "#b3d1ff",
+              "#99ccff",
+              "#80bfff",
+              "#66b2ff",
+            ],
+            borderColor: "#ffffff",
+            borderWidth: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: "#333",
+              },
+            },
+          },
+        },
+      });
     }
-
-    doc.save("revenue-insights.pdf");
-  };
+  }, [inventoryLevels]);
 
   return (
     <div>
@@ -299,90 +203,72 @@ const DashboardPage = () => {
       <main>
         <section id="dashboard" className="tab-content active">
           <h1>Performance Dashboard</h1>
-
           <div className="dashboard-cards">
             <div className="card">
-              <h2>Monthly Revenue</h2>
-              <div style={{ marginBottom: "1rem" }}>
-                <label htmlFor="year-select">Select Year: </label>
-                <select
-                  id="year-select"
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                >
-                  {availableYears.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
+              <h2>Sales</h2>
               <canvas ref={salesChartRef}></canvas>
             </div>
-
-            <div className="card" style={{ marginTop: "3rem" }}>
-              <h2>Compare Revenue Across Years</h2>
-              <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-                <select
-                  value={compareYears.year1}
-                  onChange={(e) => setCompareYears((prev) => ({ ...prev, year1: e.target.value }))}
-                >
-                  <option value="">Select Year 1</option>
-                  {availableYears.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={compareYears.year2}
-                  onChange={(e) => setCompareYears((prev) => ({ ...prev, year2: e.target.value }))}
-                >
-                  <option value="">Select Year 2</option>
-                  {availableYears.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-
-              <canvas ref={compareChartRef}></canvas>
-
-              {insights.year1 && insights.year2 && (
-                <div style={{ marginTop: "1rem" }}>
-                  <h4>Insights:</h4>
-                  <p>Total Revenue in {insights.year1}: ${insights.total1.toLocaleString()}</p>
-                  <p>Total Revenue in {insights.year2}: ${insights.total2.toLocaleString()}</p>
-                  <p>Change: ${insights.diff.toLocaleString()} ({insights.percentChange}%)</p>
-                  <p>
-                    {insights.diff > 0
-                      ? "📈 Revenue increased! Consider reinvesting in growth strategies."
-                      : "📉 Revenue declined. Consider investigating low-performing months or campaigns."}
-                  </p>
-                  <button onClick={exportToPDF} style={{ marginTop: "1rem" }}>📄 Export Insights to PDF</button>
-                </div>
-              )}
-              <div className="card">
-                <h2>Top Product Revenue</h2>
-                <canvas ref={productChartRef}></canvas>
-                <p style={{ marginTop: "1rem" }}>🏆 Top Product: Product A ($32,000)</p>
-              </div>
-
-              <div className="card" style={{ marginTop: "2rem" }}>
-                <h3>Additional Insights</h3>
-                {insights.bestMonth && insights.worstMonth && (
-                  <div>
-                    <p>📈 Best Month: {insights.bestMonth.month} (${insights.bestMonth.value.toLocaleString()})</p>
-                    <p>📉 Worst Month: {insights.worstMonth.month} (${insights.worstMonth.value.toLocaleString()})</p>
-                    <p>🔮 Forecasted Revenue (Next Month): ${insights.forecast}</p>
-                  </div>
-                )}
-              </div>
-              <div className="card">
-                <h2>Customer Demographics</h2>
-                <canvas ref={demographicsChartRef}></canvas>
-                <p style={{ marginTop: "1rem" }}>👥 Largest Segment: 25–34 years old (35%)</p>
-              </div>
+            <div className="card">
+              <h2>Customer Engagement</h2>
+              <canvas ref={engagementChartRef}></canvas>
+            </div>
+            <div className="card">
+              <h2>Inventory</h2>
+              <canvas ref={inventoryChartRef}></canvas>
             </div>
           </div>
         </section>
+
+        <section id="settings" className="tab-content">
+          <h1>Settings</h1>
+          <p>Manage backups, notifications, and access control.</p>
+        </section>
+
+        <section id="customer-dashboard" className="tab-content">
+          <h1>Customer Dashboard</h1>
+          <div>
+            <h2>Order History</h2>
+            <ul id="order-history"></ul>
+          </div>
+          <div>
+            <h2>Recommendations</h2>
+            <div id="recommendations" className="grid"></div>
+          </div>
+        </section>
       </main>
+
+      <div>
+        <h1>Metrics</h1>
+        <div className="stat-section">
+          <div className="stat-block sales">
+            <h3>Sales</h3>
+            <p>${typeof sales === 'number' ? sales.toLocaleString() : 'Loading...'}</p>
+          </div>
+          <div className="stat-block engagement">
+            <h3>Customer Engagement</h3>
+            <p>{typeof customerEngagement === 'number' ? `${customerEngagement}%` : 'Loading...'}</p>
+          </div>
+        </div>
+        <h3>Inventory Levels:</h3>
+        {Object.keys(inventoryLevels || {}).map((item, index) => {
+          const value = inventoryLevels[item];
+          const percent = typeof value === 'number' ? Math.min((value / 100) * 100, 100) : 0;
+
+          return (
+            <div key={index} style={{ marginBottom: '1rem' }}>
+              <div className="metric-label">
+                {item}: {typeof value === 'number' ? value.toLocaleString() : 'Loading...'}
+              </div>
+              <div className="metric-bar">
+                <div
+                  className="metric-bar-fill"
+                  style={{ width: `${percent}%` }}
+                ></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       <footer>
         <p>&copy; 2025 Business Web App</p>
@@ -392,4 +278,7 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+
+
+
 

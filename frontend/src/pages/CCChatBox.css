@@ -66,8 +66,13 @@
   }
   
   .message.cc .bubble {
-    background-color: #e2e8f0;
-    color: #1f2937;
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .message.user .bubble {
+    background-color: #e9ecef;
+    color: #212529;
   }
   
   /* Chat input area */
@@ -98,4 +103,52 @@
   .chat-input-area button:hover {
     background-color: #1d4ed8;
   }
-  
+
+  .chat-input-area button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+
+  .reset-button {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .reset-button:hover {
+    background-color: #e0e0e0;
+  }
+
+  .loading .bubble {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .loading span {
+    animation: loading-dots 1.4s infinite;
+    font-size: 24px;
+  }
+
+  .loading span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .loading span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes loading-dots {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 1;
+    }
+  }

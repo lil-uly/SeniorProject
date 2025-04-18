@@ -143,3 +143,33 @@ h2 {
   display: block;
   padding-left: 4px;
 }
+
+/* App Container */
+.app-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Floating Chat */
+.floating-chat {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  height: 500px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .floating-chat {
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    border-radius: 0;
+  }
+}

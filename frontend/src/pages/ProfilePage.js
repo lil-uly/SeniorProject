@@ -67,7 +67,7 @@ const ProfilePage = ({ username = "testuser" }) => {
         <h1 className="profile-name">Welcome, <span>{username}</span></h1>
         <div className="nav-buttons">
         <button className="nav-btn" onClick={() => navigate("/dashboard")}>📊 Dashboard</button>
-          <button className="nav-btn">🤖 CC: Your AI Business Companion</button>
+          <button className="nav-btn" onClick={() => navigate("/ccchatbox")}>🤖 CC: Your AI Business Companion</button>
         </div>
       </div>
 
